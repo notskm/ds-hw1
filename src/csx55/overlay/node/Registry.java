@@ -8,6 +8,8 @@ import csx55.overlay.wireformats.Register;
 
 public class Registry {
     public static void main(String[] args) {
+        parseArgs(args);
+
         ServerSocket serverSocket = openServerSocket();
         Socket nodeSocket = listenForConnections(serverSocket);
 
@@ -49,6 +51,19 @@ public class Registry {
             catch(IOException e) {
                 System.err.println("Unable to accept connection");
                 System.err.println(e.getMessage());
+            }
+        }
+    }
+    
+    private static void parseArgs(String[] args) {
+        if(args.length >= 1) {
+            try {
+                serverPort = Integer.parseInt(args[0]);
+            }
+            catch(NumberFormatException e) {
+                System.err.println("Invalid port number: " + args[0]);
+                System.err.println(e.getMessage());
+                System.exit(1);
             }
         }
     }
