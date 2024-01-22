@@ -8,7 +8,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
-public class Register {
+public class Register implements Event {
     public enum Type {
         REGISTER_REQUEST
     }
@@ -50,6 +50,7 @@ public class Register {
         return portNumber;
     }
 
+    @Override
     public byte[] getBytes() throws IOException {
         ByteArrayOutputStream baOutputStream = new ByteArrayOutputStream();
         DataOutputStream dout = new DataOutputStream(new BufferedOutputStream(baOutputStream));
@@ -67,5 +68,10 @@ public class Register {
         dout.close();
 
         return marshalledBytes;
+    }
+    
+    @Override
+    public int getType() {
+        return type.ordinal();
     }
 }

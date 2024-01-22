@@ -1,9 +1,10 @@
 package csx55.overlay.wireformats;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
 
 public class TestEvent {
     @Test
@@ -15,9 +16,16 @@ public class TestEvent {
     @Test
     public void testGettingBytes() {
         Event event = new EmptyEvent();
-        byte[] output = event.getBytes();
-        byte[] expected = new byte[]{1};
-        assertEquals(expected[0], output[0]);
+        
+        try {
+            byte[] output = event.getBytes();
+            byte[] expected = new byte[]{1};
+            assertEquals(expected[0], output[0]);
+        }
+        catch(IOException e) {
+            System.err.println(e);
+            fail("Exception thrown when getting bytes from Event.");
+        }
     }
     
     @Test
@@ -30,7 +38,7 @@ public class TestEvent {
 
 class EmptyEvent implements Event {
     @Override
-    public byte[] getBytes() {
+    public byte[] getBytes() throws IOException {
         return new byte[]{1};
     }
 
