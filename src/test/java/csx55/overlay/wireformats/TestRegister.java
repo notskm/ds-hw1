@@ -9,6 +9,31 @@ import org.junit.jupiter.api.Test;
 
 public class TestRegister {
     @Test
+    public void testRegisterIsAnEvent() {
+        Register register = new Register("localhost", 5000);
+        assertTrue(register instanceof Event);
+    }
+    
+    @Test
+    public void testGetBytes() {
+        Register register = new Register("localhost", 5000);
+        try {
+            byte[] marshalledBytes = register.getBytes();
+            Register.Type type = Register.Type.values()[marshalledBytes[0]];
+            assertEquals(type, Register.Type.REGISTER_REQUEST);
+        } catch (Exception e) {
+            System.err.println(e);
+            fail("Exception thrown when getting bytes from Register.");
+        }
+    }
+    
+    @Test
+    public void testGetType() {
+        Register register = new Register("localhost", 5000);
+        assertEquals(register.getType(), Register.Type.REGISTER_REQUEST.ordinal());
+    }
+
+    @Test
     public void testGettingIpAddress() {
         Register register = new Register("localhost", 5000);
         assertEquals(register.getIpAddress(), "localhost");
