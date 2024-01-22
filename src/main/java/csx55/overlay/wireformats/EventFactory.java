@@ -13,4 +13,8 @@ public class EventFactory {
     
     private EventFactory() {
     }
+    
+    public Event getEvent(byte[] data) {
+        return null;
+    }
 }
