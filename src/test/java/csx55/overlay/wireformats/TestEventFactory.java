@@ -24,4 +24,21 @@ public class TestEventFactory {
         Event event = factory.getEvent(new byte[0]);
         assertNull(event);
     }
+    
+    @Test
+    public void testGetEventReturnsRegisterEvent() {
+        EventFactory factory = EventFactory.getInstance();
+        Register registerEvent = new Register("localhost", 5000);
+
+        try {
+            Event event = factory.getEvent(registerEvent.getBytes());
+            assertTrue(event instanceof Register);
+            assertEquals(event.getType(), Register.Type.REGISTER_REQUEST.ordinal());
+            assertArrayEquals(registerEvent.getBytes(), event.getBytes());
+        }
+        catch(Exception e) {
+            System.err.println(e);
+            fail("Exception thrown when getting Register event from factory.");
+        }
+    }
 }

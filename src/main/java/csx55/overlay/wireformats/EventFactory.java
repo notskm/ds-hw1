@@ -1,5 +1,7 @@
 package csx55.overlay.wireformats;
 
+import java.io.IOException;
+
 public class EventFactory {
     private static EventFactory instance = null;
 
@@ -15,6 +17,16 @@ public class EventFactory {
     }
     
     public Event getEvent(byte[] data) {
-        return null;
+        if(data.length < 1) {
+            return null;
+        }
+
+        try {
+            return new Register(data);
+        }
+        catch(IOException e) {
+            System.err.println(e);
+            return null;
+        }
     }
 }
