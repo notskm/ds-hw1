@@ -9,13 +9,9 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 
 public class Register implements Event {
-    public enum Type {
-        REGISTER_REQUEST
-    }
-
-    private final Type type = Type.REGISTER_REQUEST;
     private String ipAddress;
     private int portNumber;
+    private Protocol type = Protocol.REGISTER_REQUEST;
 
     public Register(byte[] marshalledBytes) throws IOException {
         ByteArrayInputStream baInputStream = new ByteArrayInputStream(marshalledBytes);

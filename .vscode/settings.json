@@ -1,4 +1,5 @@
 {
     "java.configuration.updateBuildConfiguration": "automatic",
-    "java.autobuild.enabled": true
+    "java.autobuild.enabled": true,
+    "java.debug.settings.onBuildFailureProceed": true
 }

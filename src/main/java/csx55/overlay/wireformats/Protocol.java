@@ -1,0 +1,13 @@
+package csx55.overlay.wireformats;
+
+public enum Protocol {
+    REGISTER_REQUEST,
+    REGISTER_RESPONSE,
+    DEREGISTER_REQUEST,
+    MESSAGING_NODES_LIST,
+    LINK_WEIGHTS,
+    TASK_INITIATE,
+    TASK_COMPLETE,
+    PULL_TRAFFIC_SUMMARY,
+    TRAFFIC_SUMMARY
+}

@@ -33,7 +33,7 @@ public class TestEventFactory {
         try {
             Event event = factory.getEvent(registerEvent.getBytes());
             assertTrue(event instanceof Register);
-            assertEquals(event.getType(), Register.Type.REGISTER_REQUEST.ordinal());
+            assertEquals(event.getType(), Protocol.REGISTER_REQUEST.ordinal());
             assertArrayEquals(registerEvent.getBytes(), event.getBytes());
         }
         catch(Exception e) {

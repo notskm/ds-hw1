@@ -19,8 +19,8 @@ public class TestRegister {
         Register register = new Register("localhost", 5000);
         try {
             byte[] marshalledBytes = register.getBytes();
-            Register.Type type = Register.Type.values()[marshalledBytes[0]];
-            assertEquals(type, Register.Type.REGISTER_REQUEST);
+            Protocol type = Protocol.values()[marshalledBytes[0]];
+            assertEquals(type, Protocol.REGISTER_REQUEST);
         } catch (Exception e) {
             System.err.println(e);
             fail("Exception thrown when getting bytes from Register.");
@@ -30,7 +30,7 @@ public class TestRegister {
     @Test
     public void testGetType() {
         Register register = new Register("localhost", 5000);
-        assertEquals(register.getType(), Register.Type.REGISTER_REQUEST.ordinal());
+        assertEquals(register.getType(), Protocol.REGISTER_REQUEST.ordinal());
     }
 
     @Test
@@ -47,7 +47,7 @@ public class TestRegister {
 
     @Test
     public void testConstructionFromBytes() {
-        byte[] marshalledBytes = createMarshalledRegister(Register.Type.REGISTER_REQUEST, "localhost", 5000);
+        byte[] marshalledBytes = createMarshalledRegister(Protocol.REGISTER_REQUEST, "localhost", 5000);
         try {
             Register register = new Register(marshalledBytes);
 
@@ -59,7 +59,7 @@ public class TestRegister {
         }
     }
 
-    private byte[] createMarshalledRegister(Register.Type type, String ipAddress, int portNumber) {
+    private byte[] createMarshalledRegister(Protocol type, String ipAddress, int portNumber) {
         try {
             ByteArrayOutputStream baOutputStream = new ByteArrayOutputStream();
             DataOutputStream dout = new DataOutputStream(baOutputStream);
