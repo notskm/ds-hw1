@@ -10,14 +10,8 @@ public class MessagingNode {
     public static void main(String[] args) {
         parseArgs(args);
 
-        try {
-            Socket registrySocket = new Socket(registryHost, registryPort);
-            DataOutputStream out = new DataOutputStream(registrySocket.getOutputStream());
-            byte[] output = new Register("localhost", 5001).getBytes();
-            out.writeInt(output.length);
-            out.write(output);
-            out.close();
-            registrySocket.close();
+        try (Socket registrySocket = new Socket(registryHost, registryPort)) {
+            sendRegisterRequest(registrySocket);
         } catch (UnknownHostException e) {
             System.err.println("Unknown host: " + registryHost);
             System.err.println(e.getMessage());
@@ -27,6 +21,14 @@ public class MessagingNode {
             System.err.println(e.getMessage());
             System.exit(1);
         }
+    }
+
+    private static void sendRegisterRequest(Socket socket) throws IOException {
+        DataOutputStream out = new DataOutputStream(socket.getOutputStream());
+        byte[] output = new Register("localhost", 5001).getBytes();
+        out.writeInt(output.length);
+        out.write(output);
+        out.close();
     }
 
     private static void parseArgs(String[] args) {
