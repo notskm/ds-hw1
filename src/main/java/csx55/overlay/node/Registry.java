@@ -4,6 +4,10 @@ import java.net.Socket;
 import java.net.ServerSocket;
 import java.io.IOException;
 import java.io.DataInputStream;
+
+import csx55.overlay.wireformats.Event;
+import csx55.overlay.wireformats.EventFactory;
+import csx55.overlay.wireformats.Protocol;
 import csx55.overlay.wireformats.Register;
 
 public class Registry {
@@ -14,19 +18,36 @@ public class Registry {
         Socket nodeSocket = listenForConnections(serverSocket);
 
         try {
-            DataInputStream in = new DataInputStream(nodeSocket.getInputStream());
-
-            byte[] data = new byte[in.readInt()];
-            in.readFully(data);
-            Register register = new Register(data);
-
-            System.out.println(register.getIpAddress());
-            System.out.println(register.getPortNumber());
-            in.close();
+            Event event = readData(nodeSocket);
+            onEvent(event);
         } catch (IOException e) {
             System.err.println("Unable to read from socket");
             System.err.println(e.getMessage());
         }
+    }
+
+    private static Event readData(Socket nodeSocket) throws IOException {
+        DataInputStream in = new DataInputStream(nodeSocket.getInputStream());
+        byte[] data = new byte[in.readInt()];
+        in.readFully(data);
+        in.close();
+
+        return EventFactory.getInstance().getEvent(data);
+    }
+
+    private static void onEvent(Event event) {
+        switch (Protocol.values()[event.getType()]) {
+            case REGISTER_REQUEST:
+                onRegisterRequest((Register) event);
+                break;
+            default:
+                break;
+        }
+    }
+
+    private static void onRegisterRequest(Register register) {
+        System.out.println(register.getIpAddress());
+        System.out.println(register.getPortNumber());
     }
 
     public static ServerSocket openServerSocket() {
