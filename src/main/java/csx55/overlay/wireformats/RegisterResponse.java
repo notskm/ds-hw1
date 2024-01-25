@@ -1,11 +1,15 @@
 package csx55.overlay.wireformats;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+
 public class RegisterResponse {
     enum Status {
         SUCCESS,
         FAILURE
     }
-    
+
     private Status response_status;
     private String information;
     
@@ -20,5 +24,21 @@ public class RegisterResponse {
     
     public String getInfo() {
         return information;
+    }
+
+    public byte[] getBytes() throws IOException {
+        ByteArrayOutputStream bout = new ByteArrayOutputStream();
+        DataOutputStream dout = new DataOutputStream(bout);
+        
+        dout.writeInt(response_status.ordinal());
+        dout.writeInt(information.length());
+        dout.writeBytes(information);
+
+        byte[] bytes = bout.toByteArray();
+
+        dout.close();
+        bout.close();
+        
+        return bytes;
     }
 }
