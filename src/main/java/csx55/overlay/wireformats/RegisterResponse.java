@@ -4,7 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
-public class RegisterResponse {
+public class RegisterResponse implements Event {
     enum Status {
         SUCCESS,
         FAILURE
@@ -40,5 +40,11 @@ public class RegisterResponse {
         bout.close();
         
         return bytes;
+    }
+
+    @Override
+    public int getType() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getType'");
     }
 }

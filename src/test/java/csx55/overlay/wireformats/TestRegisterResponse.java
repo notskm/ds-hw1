@@ -15,6 +15,12 @@ import csx55.overlay.wireformats.RegisterResponse.Status;
 
 public class TestRegisterResponse {
     @Test
+    void testRegisterResponseIsAnEvent() {
+        RegisterResponse response = new RegisterResponse(Status.SUCCESS, "");
+        assert(response instanceof Event);
+    }
+
+    @Test
     void testConstruction() {
         RegisterResponse response = new RegisterResponse(Status.SUCCESS, "");
         assertEquals(Status.SUCCESS, response.getStatus());
