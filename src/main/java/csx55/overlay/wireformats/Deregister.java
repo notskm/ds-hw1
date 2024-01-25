@@ -1,5 +1,7 @@
 package csx55.overlay.wireformats;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 
 public class Deregister implements Event {
@@ -13,8 +15,19 @@ public class Deregister implements Event {
 
     @Override
     public byte[] getBytes() throws IOException {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getBytes'");
+        ByteArrayOutputStream baout = new ByteArrayOutputStream();
+        DataOutputStream dout = new DataOutputStream(baout);
+
+        dout.writeInt(ipAddress.length());
+        dout.writeBytes(ipAddress);
+        dout.writeInt(portNumber);
+        
+        byte[] marshalledBytes = baout.toByteArray();
+        
+        dout.close();
+        baout.close();
+
+        return marshalledBytes;
     }
 
     @Override
