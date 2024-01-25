@@ -1,6 +1,5 @@
 package csx55.overlay.wireformats;
 
-import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
@@ -26,5 +25,11 @@ public class TestDeregister {
     void testGetPort(int port) {
         Deregister deregister = new Deregister("localhost", port);
         assertEquals(port, deregister.getPort());
+    }
+    
+    @Test
+    void testGetType() {
+        Deregister deregister = new Deregister("localhost", 5000);
+        assertEquals(Protocol.DEREGISTER_REQUEST.ordinal(), deregister.getType());
     }
 }
