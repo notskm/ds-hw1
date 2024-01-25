@@ -10,7 +10,13 @@ public class TestRegisterResponse {
     @Test
     void testConstruction() {
         RegisterResponse response = new RegisterResponse(Status.SUCCESS, "");
-        assertEquals(RegisterResponse.Status.SUCCESS, response.getStatus());
+        assertEquals(Status.SUCCESS, response.getStatus());
         assertEquals("", response.getInfo());
+    }
+    
+    @Test
+    void testGetStatusFailure() {
+        RegisterResponse response = new RegisterResponse(Status.FAILURE, "");
+        assertEquals(Status.FAILURE, response.getStatus());
     }
 }

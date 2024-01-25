@@ -6,12 +6,14 @@ public class RegisterResponse {
         FAILURE
     }
     
+    private Status response_status;
+    
     RegisterResponse(Status status, String info) {
-
+        response_status = status;
     }
     
     public Status getStatus() {
-        return Status.SUCCESS;
+        return response_status;
     }
     
     public String getInfo() {
