@@ -44,7 +44,6 @@ public class RegisterResponse implements Event {
 
     @Override
     public int getType() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getType'");
+        return Protocol.REGISTER_RESPONSE.ordinal();
     }
 }

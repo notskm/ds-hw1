@@ -26,6 +26,12 @@ public class TestRegisterResponse {
         assertEquals(Status.SUCCESS, response.getStatus());
         assertEquals("", response.getInfo());
     }
+    
+    @Test
+    void testGetType() {
+        RegisterResponse response = new RegisterResponse(Status.SUCCESS, "");
+        assertEquals(Protocol.REGISTER_RESPONSE.ordinal(), response.getType());
+    }
 
     @ParameterizedTest
     @EnumSource(Status.class)
