@@ -7,9 +7,11 @@ public class RegisterResponse {
     }
     
     private Status response_status;
+    private String information;
     
     RegisterResponse(Status status, String info) {
         response_status = status;
+        information = info;
     }
     
     public Status getStatus() {
@@ -17,6 +19,6 @@ public class RegisterResponse {
     }
     
     public String getInfo() {
-        return "";
+        return information;
     }
 }

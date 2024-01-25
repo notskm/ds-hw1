@@ -19,4 +19,10 @@ public class TestRegisterResponse {
         RegisterResponse response = new RegisterResponse(Status.FAILURE, "");
         assertEquals(Status.FAILURE, response.getStatus());
     }
+    
+    @Test
+    void testGetInfo() {
+        RegisterResponse response = new RegisterResponse(Status.SUCCESS, "information");
+        assertEquals("information", response.getInfo());
+    }
 }
