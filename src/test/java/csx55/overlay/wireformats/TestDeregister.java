@@ -1,8 +1,6 @@
 package csx55.overlay.wireformats;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
@@ -20,10 +18,23 @@ public class TestDeregister {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = { "localhost", "192.169.0.1" })
+    @ValueSource(strings = { "localhost", "192.168.0.1" })
     void testGetIpAddress(String ipAddress) {
         Deregister deregister = new Deregister(ipAddress, 0);
         assertEquals(ipAddress, deregister.getIpAddress());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "localhost", "192.168.0.1" })
+    void testGetIpAddressWhenConstructedFromBytes(String ipAddress) {
+        try {
+            byte[] deregisterBytes = new Deregister(ipAddress, 0).getBytes();
+            Deregister deregister = new Deregister(deregisterBytes);
+
+            assertEquals(ipAddress, deregister.getIpAddress());
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
     }
 
     @ParameterizedTest
@@ -33,6 +44,19 @@ public class TestDeregister {
         assertEquals(port, deregister.getPort());
     }
 
+    @ParameterizedTest
+    @ValueSource(ints = { 0, 5000, 8000, 3472 })
+    void testGetPortWhenConstructedFromBytes(int port) {
+        try {
+            byte[] deregisterBytes = new Deregister("localhost", port).getBytes();
+            Deregister deregister = new Deregister(deregisterBytes);
+
+            assertEquals(port, deregister.getPort());
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
+    }
+
     @Test
     void testGetType() {
         Deregister deregister = new Deregister("localhost", 5000);
@@ -40,7 +64,7 @@ public class TestDeregister {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = { "localhost", "192.169.0.1" })
+    @ValueSource(strings = { "localhost", "192.168.0.1" })
     void testGetBytesGivenIPAddress(String ipAddress) {
         try {
             Deregister deregister = new Deregister(ipAddress, 5000);
