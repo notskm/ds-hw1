@@ -3,8 +3,12 @@ package csx55.overlay.wireformats;
 import java.io.IOException;
 
 public class Deregister implements Event {
-    public Deregister() {
-        
+    String ipAddress;
+    int portNumber;
+
+    public Deregister(String ip, int port) {
+        ipAddress = ip;
+        portNumber = port;
     }
 
     @Override
@@ -18,5 +22,12 @@ public class Deregister implements Event {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'getType'");
     }
-    
+
+    public Object getIpAddress() {
+        return ipAddress;
+    }
+
+	public Integer getPort() {
+        return portNumber;
+	}
 }
