@@ -5,6 +5,7 @@ import java.net.ServerSocket;
 import java.io.IOException;
 import java.io.DataInputStream;
 
+import csx55.overlay.transport.TCPServerThread;
 import csx55.overlay.wireformats.Event;
 import csx55.overlay.wireformats.EventFactory;
 import csx55.overlay.wireformats.Protocol;
@@ -14,18 +15,37 @@ public class Registry {
     public static void main(String[] args) {
         parseArgs(args);
 
-        ServerSocket serverSocket = openServerSocket();
-        Socket nodeSocket = listenForConnections(serverSocket);
+        try {
+            TCPServerThread serverThread = createServerThread(serverPort);
+            serverThread.start();
 
+            while (true) {
+                Socket nodeSocket = serverThread.poll();
+
+                if (nodeSocket != null) {
+                    readAndTriggerEvent(nodeSocket);
+                }
+            }
+        } catch (IOException e) {
+            System.err.println(e.getMessage());
+        }
+    }
+    
+    public static TCPServerThread createServerThread(int port) throws IOException {
+        ServerSocket socket = new ServerSocket(port);
+        TCPServerThread thread = new TCPServerThread(socket);
+        return thread;
+    }
+
+    private static void readAndTriggerEvent(Socket nodeSocket) {
         try {
             Event event = readData(nodeSocket);
             onEvent(event);
         } catch (IOException e) {
-            System.err.println("Unable to read from socket");
             System.err.println(e.getMessage());
         }
     }
-
+    
     private static Event readData(Socket nodeSocket) throws IOException {
         DataInputStream in = new DataInputStream(nodeSocket.getInputStream());
         byte[] data = new byte[in.readInt()];
@@ -48,17 +68,6 @@ public class Registry {
     private static void onRegisterRequest(Register register) {
         System.out.println(register.getIpAddress());
         System.out.println(register.getPortNumber());
-    }
-
-    public static ServerSocket openServerSocket() {
-        try {
-            return new ServerSocket(serverPort);
-        } catch (IOException e) {
-            System.err.println("Unable to start registry on port " + serverPort);
-            System.err.println(e.getMessage());
-            System.exit(1);
-        }
-        return null;
     }
 
     public static Socket listenForConnections(ServerSocket socket) {
