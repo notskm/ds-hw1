@@ -1,6 +1,7 @@
 package csx55.overlay.transport;
 
 import java.io.DataInputStream;
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
@@ -26,6 +27,8 @@ public class TCPReceiverThread extends Thread {
             while (!recieverSocket.isClosed()) {
                 waitThenQueueEvent(dis);
             }
+        } catch(EOFException e) {
+            System.err.println("TCPReceiverThread reached the end of the input stream");
         } catch (IOException e) {
             System.err.println(e.getMessage());
         }
