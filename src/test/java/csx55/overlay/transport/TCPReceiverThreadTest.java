@@ -66,6 +66,13 @@ public class TCPReceiverThreadTest {
         }
     }
 
+    @Test
+    void testGetSocket() {
+        TCPReceiverThread thread = new TCPReceiverThread(receiverSocket);
+        Socket socket = thread.getSocket();
+        assertEquals(socket, receiverSocket);
+    }
+
     byte[] addLengthToByteArray(byte[] bytes) throws IOException {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         DataOutputStream dos = new DataOutputStream(bos);
@@ -95,4 +102,5 @@ public class TCPReceiverThreadTest {
             fail(e.getMessage());
         }
     }
+    
 }

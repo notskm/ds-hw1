@@ -12,19 +12,19 @@ import csx55.overlay.wireformats.Event;
 import csx55.overlay.wireformats.EventFactory;
 
 public class TCPReceiverThread extends Thread {
-    Socket recieverSocket;
+    Socket receiverSocket;
     Queue<Event> eventQueue;
     EventFactory eventFactory;
 
     public TCPReceiverThread(Socket socket) {
-        recieverSocket = socket;
+        receiverSocket = socket;
         eventQueue = new LinkedList<>();
         eventFactory = EventFactory.getInstance();
     }
 
     public void run() {
         try (DataInputStream dis = getDataStream()) {
-            while (!recieverSocket.isClosed()) {
+            while (!receiverSocket.isClosed()) {
                 waitThenQueueEvent(dis);
             }
         } catch(EOFException e) {
@@ -40,7 +40,7 @@ public class TCPReceiverThread extends Thread {
     }
 
     private DataInputStream getDataStream() throws IOException {
-        InputStream is = recieverSocket.getInputStream();
+        InputStream is = receiverSocket.getInputStream();
         return new DataInputStream(is);
     }
 
@@ -58,5 +58,9 @@ public class TCPReceiverThread extends Thread {
 
     public synchronized Event poll() {
         return eventQueue.poll();
+    }
+
+    public Socket getSocket() {
+        return receiverSocket;
     }
 }
