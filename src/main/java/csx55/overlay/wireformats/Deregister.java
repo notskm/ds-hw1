@@ -1,7 +1,5 @@
 package csx55.overlay.wireformats;
 
-import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
 import java.io.IOException;
 
 public class Deregister extends Event {
@@ -14,22 +12,7 @@ public class Deregister extends Event {
     }
 
     public Deregister(byte[] deregisterBytes) throws IOException {
-        ByteArrayInputStream bain = new ByteArrayInputStream(deregisterBytes);
-        DataInputStream din = new DataInputStream(bain);
-        
-        int type = din.readInt();
-        if(type != Protocol.DEREGISTER_REQUEST.ordinal()) {
-            throw new IOException();
-        }
-        
-        int ipLength = din.readInt();
-        byte[] ipBytes = new byte[ipLength];
-
-        din.readFully(ipBytes);
-        
-        portNumber = din.readInt();
-        
-        ipAddress = new String(ipBytes);
+        super(deregisterBytes);
     }
 
     @Override

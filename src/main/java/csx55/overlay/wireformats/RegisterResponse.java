@@ -1,7 +1,5 @@
 package csx55.overlay.wireformats;
 
-import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
 import java.io.IOException;
 
 public class RegisterResponse extends Event {
@@ -19,21 +17,7 @@ public class RegisterResponse extends Event {
     }
     
     public RegisterResponse(byte[] bytes) throws IOException {
-        ByteArrayInputStream bain = new ByteArrayInputStream(bytes);
-        DataInputStream din = new DataInputStream(bain);
-
-        int typeOrdinal = din.readInt();
-        if(typeOrdinal != getType()) {
-            throw new IOException("Read incorrect Protocol type: " + typeOrdinal);
-        }
-        
-        responseStatus = din.readByte();
-
-        int length = din.readInt();
-        byte[] infoData = new byte[length];
-        din.readFully(infoData);
-
-        information = new String(infoData);
+        super(bytes);
     }
     
     public Status getStatus() {

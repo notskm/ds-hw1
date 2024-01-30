@@ -1,8 +1,5 @@
 package csx55.overlay.wireformats;
 
-import java.io.ByteArrayInputStream;
-import java.io.BufferedInputStream;
-import java.io.DataInputStream;
 import java.io.IOException;
 
 public class Register extends Event {
@@ -10,23 +7,7 @@ public class Register extends Event {
     private int portNumber;
 
     public Register(byte[] marshalledBytes) throws IOException {
-        ByteArrayInputStream baInputStream = new ByteArrayInputStream(marshalledBytes);
-        DataInputStream din = new DataInputStream(new BufferedInputStream(baInputStream));
-
-        int typeValue = din.readInt();
-        if (typeValue != Protocol.REGISTER_REQUEST.ordinal()) {
-            throw new IOException("Bytes didn't correspond to a RegisterRequest.");
-        }
-
-        int ipAddressLength = din.readInt();
-        byte[] ipAddressBytes = new byte[ipAddressLength];
-        din.readFully(ipAddressBytes);
-
-        ipAddress = new String(ipAddressBytes);
-        portNumber = din.readInt();
-
-        baInputStream.close();
-        din.close();
+        super(marshalledBytes);
     }
 
     public Register(String ipAddress, int portNumber) {
