@@ -5,11 +5,10 @@ import java.util.ArrayList;
 import java.util.Objects;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
-import java.io.BufferedOutputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 
 import csx55.overlay.transport.TCPReceiverThread;
+import csx55.overlay.transport.TCPSender;
 import csx55.overlay.transport.TCPServerThread;
 import csx55.overlay.wireformats.Event;
 import csx55.overlay.wireformats.Protocol;
@@ -101,12 +100,7 @@ public class Registry {
         RegisterResponse response = new RegisterResponse(status, message);
 
         try {
-            BufferedOutputStream bos = new BufferedOutputStream(socket.getOutputStream());
-            DataOutputStream dos = new DataOutputStream(bos);
-            byte[] responseBytes = response.getBytes();
-            dos.writeInt(responseBytes.length);
-            dos.write(responseBytes);
-            dos.flush();
+            new TCPSender(socket).send(response);
         }
         catch(IOException e) {
             System.err.println(e.getMessage());

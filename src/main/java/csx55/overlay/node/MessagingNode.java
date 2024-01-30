@@ -3,10 +3,9 @@ package csx55.overlay.node;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.io.IOException;
-import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
-import java.io.DataOutputStream;
 
+import csx55.overlay.transport.TCPSender;
 import csx55.overlay.wireformats.Event;
 import csx55.overlay.wireformats.EventFactory;
 import csx55.overlay.wireformats.Register;
@@ -36,12 +35,7 @@ public class MessagingNode {
     }
 
     private static void sendRegisterRequest(Socket socket) throws IOException {
-        BufferedOutputStream bout = new BufferedOutputStream(socket.getOutputStream());
-        DataOutputStream out = new DataOutputStream(bout);
-        byte[] output = new Register("127.0.0.1", 5001).getBytes();
-        out.writeInt(output.length);
-        out.write(output);
-        out.flush();
+        new TCPSender(socket).send(new Register("127.0.0.1", 5001));
     }
 
     private static void parseArgs(String[] args) {
