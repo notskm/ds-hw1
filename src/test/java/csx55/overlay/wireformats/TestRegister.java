@@ -22,8 +22,7 @@ public class TestRegister {
             Protocol type = Protocol.values()[marshalledBytes[0]];
             assertEquals(type, Protocol.REGISTER_REQUEST);
         } catch (Exception e) {
-            System.err.println(e);
-            fail("Exception thrown when getting bytes from Register.");
+            fail(e.getMessage());
         }
     }
     

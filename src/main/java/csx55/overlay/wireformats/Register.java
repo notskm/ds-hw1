@@ -1,24 +1,20 @@
 package csx55.overlay.wireformats;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 
-public class Register implements Event {
+public class Register extends Event {
     private String ipAddress;
     private int portNumber;
-    private Protocol type = Protocol.REGISTER_REQUEST;
 
     public Register(byte[] marshalledBytes) throws IOException {
         ByteArrayInputStream baInputStream = new ByteArrayInputStream(marshalledBytes);
         DataInputStream din = new DataInputStream(new BufferedInputStream(baInputStream));
 
         int typeValue = din.readInt();
-        if (typeValue != type.ordinal()) {
+        if (typeValue != Protocol.REGISTER_REQUEST.ordinal()) {
             throw new IOException("Bytes didn't correspond to a RegisterRequest.");
         }
 
@@ -47,27 +43,7 @@ public class Register implements Event {
     }
 
     @Override
-    public byte[] getBytes() throws IOException {
-        ByteArrayOutputStream baOutputStream = new ByteArrayOutputStream();
-        DataOutputStream dout = new DataOutputStream(new BufferedOutputStream(baOutputStream));
-
-        dout.writeInt(type.ordinal());
-
-        dout.writeInt(ipAddress.length());
-        dout.writeBytes(ipAddress);
-        dout.writeInt(portNumber);
-
-        dout.flush();
-        byte[] marshalledBytes = baOutputStream.toByteArray();
-
-        baOutputStream.close();
-        dout.close();
-
-        return marshalledBytes;
-    }
-    
-    @Override
     public int getType() {
-        return type.ordinal();
+        return Protocol.REGISTER_REQUEST.ordinal();
     }
 }

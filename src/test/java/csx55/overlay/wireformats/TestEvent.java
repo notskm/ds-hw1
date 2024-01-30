@@ -12,22 +12,21 @@ public class TestEvent {
         Event event = new EmptyEvent();
         assertNotNull(event);
     }
-    
+
     @Test
     public void testGettingBytes() {
         Event event = new EmptyEvent();
-        
+
         try {
             byte[] output = event.getBytes();
-            byte[] expected = new byte[]{1};
-            assertEquals(expected[0], output[0]);
-        }
-        catch(IOException e) {
+            byte[] expected = new byte[] { 0, 0, 0, 0 };
+            assertArrayEquals(expected, output);
+        } catch (IOException e) {
             System.err.println(e);
             fail("Exception thrown when getting bytes from Event.");
         }
     }
-    
+
     @Test
     public void testGettingType() {
         Event event = new EmptyEvent();
@@ -36,12 +35,7 @@ public class TestEvent {
     }
 }
 
-class EmptyEvent implements Event {
-    @Override
-    public byte[] getBytes() throws IOException {
-        return new byte[]{1};
-    }
-
+class EmptyEvent extends Event {
     @Override
     public int getType() {
         return 0;

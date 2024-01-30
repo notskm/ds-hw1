@@ -95,6 +95,7 @@ public class TestDeregister {
         ByteArrayOutputStream baout = new ByteArrayOutputStream();
         DataOutputStream dout = new DataOutputStream(baout);
 
+        dout.writeInt(Protocol.DEREGISTER_REQUEST.ordinal());
         dout.writeInt(ipAddress.length());
         dout.writeBytes(ipAddress);
         dout.writeInt(port);

@@ -1,8 +1,6 @@
 package csx55.overlay.wireformats;
 
-import java.io.IOException;
-
-public class LinkWeights implements Event {
+public class LinkWeights extends Event {
     String hostnameA;
     String hostnameB;
     int portNumberA;
@@ -35,12 +33,6 @@ public class LinkWeights implements Event {
 
     public int getWeight() {
         return linkWeight;
-    }
-
-    @Override
-    public byte[] getBytes() throws IOException {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getBytes'");
     }
 
     @Override

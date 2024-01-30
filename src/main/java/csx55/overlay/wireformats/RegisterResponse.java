@@ -1,22 +1,20 @@
 package csx55.overlay.wireformats;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 
-public class RegisterResponse implements Event {
+public class RegisterResponse extends Event {
     public enum Status {
         SUCCESS,
         FAILURE
     }
 
-    private Status response_status;
+    private byte responseStatus;
     private String information;
     
     public RegisterResponse(Status status, String info) {
-        response_status = status;
+        responseStatus = status == Status.SUCCESS ? (byte)0 : (byte)1;
         information = info;
     }
     
@@ -29,8 +27,7 @@ public class RegisterResponse implements Event {
             throw new IOException("Read incorrect Protocol type: " + typeOrdinal);
         }
         
-        int status = din.readInt();
-        response_status = Status.values()[status];
+        responseStatus = din.readByte();
 
         int length = din.readInt();
         byte[] infoData = new byte[length];
@@ -40,28 +37,16 @@ public class RegisterResponse implements Event {
     }
     
     public Status getStatus() {
-        return response_status;
+        if(responseStatus == (byte)0) {
+            return Status.SUCCESS;
+        }
+        else {
+            return Status.FAILURE;
+        }
     }
     
     public String getInfo() {
         return information;
-    }
-
-    public byte[] getBytes() throws IOException {
-        ByteArrayOutputStream bout = new ByteArrayOutputStream();
-        DataOutputStream dout = new DataOutputStream(bout);
-        
-        dout.writeInt(getType());
-        dout.writeInt(response_status.ordinal());
-        dout.writeInt(information.length());
-        dout.writeBytes(information);
-
-        byte[] bytes = bout.toByteArray();
-
-        dout.close();
-        bout.close();
-        
-        return bytes;
     }
 
     @Override
