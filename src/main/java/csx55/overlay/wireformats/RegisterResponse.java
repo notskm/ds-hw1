@@ -1,11 +1,13 @@
 package csx55.overlay.wireformats;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
 public class RegisterResponse implements Event {
-    enum Status {
+    public enum Status {
         SUCCESS,
         FAILURE
     }
@@ -13,9 +15,28 @@ public class RegisterResponse implements Event {
     private Status response_status;
     private String information;
     
-    RegisterResponse(Status status, String info) {
+    public RegisterResponse(Status status, String info) {
         response_status = status;
         information = info;
+    }
+    
+    public RegisterResponse(byte[] bytes) throws IOException {
+        ByteArrayInputStream bain = new ByteArrayInputStream(bytes);
+        DataInputStream din = new DataInputStream(bain);
+
+        int typeOrdinal = din.readInt();
+        if(typeOrdinal != getType()) {
+            throw new IOException("Read incorrect Protocol type: " + typeOrdinal);
+        }
+        
+        int status = din.readInt();
+        response_status = Status.values()[status];
+
+        int length = din.readInt();
+        byte[] infoData = new byte[length];
+        din.readFully(infoData);
+
+        information = new String(infoData);
     }
     
     public Status getStatus() {
@@ -30,6 +51,7 @@ public class RegisterResponse implements Event {
         ByteArrayOutputStream bout = new ByteArrayOutputStream();
         DataOutputStream dout = new DataOutputStream(bout);
         
+        dout.writeInt(getType());
         dout.writeInt(response_status.ordinal());
         dout.writeInt(information.length());
         dout.writeBytes(information);

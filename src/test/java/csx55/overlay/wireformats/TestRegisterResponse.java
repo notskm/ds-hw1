@@ -17,7 +17,7 @@ public class TestRegisterResponse {
     @Test
     void testRegisterResponseIsAnEvent() {
         RegisterResponse response = new RegisterResponse(Status.SUCCESS, "");
-        assert(response instanceof Event);
+        assert (response instanceof Event);
     }
 
     @Test
@@ -26,7 +26,31 @@ public class TestRegisterResponse {
         assertEquals(Status.SUCCESS, response.getStatus());
         assertEquals("", response.getInfo());
     }
-    
+
+    @ParameterizedTest
+    @EnumSource(Status.class)
+    void testConstructionFromBytesWithStatus(Status status) {
+        try {
+            RegisterResponse expected = new RegisterResponse(status, "");
+            RegisterResponse response = new RegisterResponse(expected.getBytes());
+            assertArrayEquals(expected.getBytes(), response.getBytes());
+        } catch (IOException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings={"", "error message", "success message"})
+    void testConstructionFromBytesWithMessage(String message) {
+        try {
+            RegisterResponse expected = new RegisterResponse(Status.SUCCESS, message);
+            RegisterResponse response = new RegisterResponse(expected.getBytes());
+            assertArrayEquals(expected.getBytes(), response.getBytes());
+        } catch (IOException e) {
+            fail(e.getMessage());
+        }
+    }
+
     @Test
     void testGetType() {
         RegisterResponse response = new RegisterResponse(Status.SUCCESS, "");
@@ -46,34 +70,35 @@ public class TestRegisterResponse {
             fail(e.getMessage());
         }
     }
-    
+
     @ParameterizedTest
-    @ValueSource(strings = {"", "test", "hello world"})
+    @ValueSource(strings = { "", "test", "hello world" })
     void testGetBytesInfoString(String info) {
         try {
             RegisterResponse response = new RegisterResponse(Status.SUCCESS, info);
             byte[] marshalledBytes = response.getBytes();
             byte[] expectedBytes = createMarshalledRegisterResponse(Status.SUCCESS, info);
-            
+
             assertArrayEquals(expectedBytes, marshalledBytes);
         } catch (Exception e) {
             fail(e.getMessage());
         }
     }
-    
+
     byte[] createMarshalledRegisterResponse(Status status, String info) throws IOException {
         ByteArrayOutputStream bout = new ByteArrayOutputStream();
         DataOutputStream dout = new DataOutputStream(bout);
-        
+
+        dout.writeInt(Protocol.REGISTER_RESPONSE.ordinal());
         dout.writeInt(status.ordinal());
         dout.writeInt(info.length());
         dout.writeBytes(info);
-        
+
         byte[] bytes = bout.toByteArray();
 
         dout.close();
         bout.close();
-        
+
         return bytes;
     }
 
