@@ -4,8 +4,13 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.io.IOException;
 import java.io.BufferedOutputStream;
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
+
+import csx55.overlay.wireformats.Event;
+import csx55.overlay.wireformats.EventFactory;
 import csx55.overlay.wireformats.Register;
+import csx55.overlay.wireformats.RegisterResponse;
 
 public class MessagingNode {
     public static void main(String[] args) {
@@ -13,6 +18,12 @@ public class MessagingNode {
 
         try (Socket registrySocket = new Socket(registryHost, registryPort)) {
             sendRegisterRequest(registrySocket);
+            DataInputStream dis = new DataInputStream(registrySocket.getInputStream());
+            int dataLength = dis.readInt();
+            byte[] data = new byte[dataLength];
+            dis.readFully(data);
+            Event event = EventFactory.getInstance().getEvent(data);
+            System.out.println(((RegisterResponse)event).getInfo());
         } catch (UnknownHostException e) {
             System.err.println("Unknown host: " + registryHost);
             System.err.println(e.getMessage());
@@ -27,7 +38,7 @@ public class MessagingNode {
     private static void sendRegisterRequest(Socket socket) throws IOException {
         BufferedOutputStream bout = new BufferedOutputStream(socket.getOutputStream());
         DataOutputStream out = new DataOutputStream(bout);
-        byte[] output = new Register("localhost", 5001).getBytes();
+        byte[] output = new Register("127.0.0.1", 5001).getBytes();
         out.writeInt(output.length);
         out.write(output);
         out.flush();
