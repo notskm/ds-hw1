@@ -3,8 +3,15 @@ package csx55.overlay.wireformats;
 import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+
+import csx55.overlay.wireformats.RegisterResponse.Status;
 
 import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.util.stream.Stream;
 
 public class TestEvent {
     @Test
@@ -32,6 +39,28 @@ public class TestEvent {
         Event event = new EmptyEvent();
         int type = event.getType();
         assertEquals(0, type);
+    }
+    
+    @ParameterizedTest
+    @MethodSource("provideEvents")
+    public void testConstruction(Event event) {
+        try {
+            Constructor<?> ctor = event.getClass().getConstructor(byte[].class);
+            Event newEvent = (Event)ctor.newInstance(event.getBytes());
+            assertArrayEquals(event.getBytes(), newEvent.getBytes());
+        }
+        catch(Exception e) {
+            fail(e.getMessage());
+        }
+    }
+    
+    private static Stream<Arguments> provideEvents() {
+        return Stream.of(
+            Arguments.of(new Register("localhost", 5000)),
+            Arguments.of(new RegisterResponse(Status.SUCCESS, "info")),
+            Arguments.of(new Deregister("127.0.0.1", 5012)),
+            Arguments.of(new LinkWeights("2", 0, "8", 0, 0))
+        );
     }
 }
 

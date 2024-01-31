@@ -1,5 +1,7 @@
 package csx55.overlay.wireformats;
 
+import java.io.IOException;
+
 public class LinkWeights extends Event {
     String hostnameA;
     String hostnameB;
@@ -13,6 +15,10 @@ public class LinkWeights extends Event {
         portNumberA = portA;
         portNumberB = portB;
         linkWeight = weight;
+    }
+    
+    public LinkWeights(byte[] bytes) throws IOException {
+        super(bytes);
     }
 
     public String getHostnameA() {
