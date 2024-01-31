@@ -66,7 +66,8 @@ public class TestEvent {
             Arguments.of(new Deregister("127.0.0.1", 5012)),
             Arguments.of(new LinkWeights(links)),
             Arguments.of(new TaskComplete("localhost", 5000)),
-            Arguments.of(new TaskSummaryRequest())
+            Arguments.of(new TaskSummaryRequest()),
+            Arguments.of(new TaskInitiate(5))
         );
     }
 }
