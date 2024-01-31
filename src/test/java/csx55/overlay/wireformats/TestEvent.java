@@ -67,7 +67,8 @@ public class TestEvent {
             Arguments.of(new LinkWeights(links)),
             Arguments.of(new TaskComplete("localhost", 5000)),
             Arguments.of(new TaskSummaryRequest()),
-            Arguments.of(new TaskInitiate(5))
+            Arguments.of(new TaskInitiate(5)),
+            Arguments.of(new TaskSummaryResponse("localhost", 5, 6, 7, 8, 9, 10))
         );
     }
 }
