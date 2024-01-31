@@ -59,6 +59,11 @@ public class TestEvent {
             new LinkInfo("localhost", 5000, "localhost", 50001, 10),
             new LinkInfo("127.0.0.1", 8342, "192.168.0.1", 8430, 5)
         };
+        
+        MessagingNodeInfo[] nodes = new MessagingNodeInfo[] {
+            new MessagingNodeInfo("localhost", 5000),
+            new MessagingNodeInfo("127.0.0.1", 0)
+        };
 
         return Stream.of(
             Arguments.of(new Register("localhost", 5000)),
@@ -68,7 +73,8 @@ public class TestEvent {
             Arguments.of(new TaskComplete("localhost", 5000)),
             Arguments.of(new TaskSummaryRequest()),
             Arguments.of(new TaskInitiate(5)),
-            Arguments.of(new TaskSummaryResponse("localhost", 5, 6, 7, 8, 9, 10))
+            Arguments.of(new TaskSummaryResponse("localhost", 5, 6, 7, 8, 9, 10)),
+            Arguments.of(new MessagingNodesList(nodes))
         );
     }
 }
