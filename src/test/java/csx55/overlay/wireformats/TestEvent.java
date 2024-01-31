@@ -55,11 +55,16 @@ public class TestEvent {
     }
     
     private static Stream<Arguments> provideEvents() {
+        LinkInfo[] links = new LinkInfo[] {
+            new LinkInfo("localhost", 5000, "localhost", 50001, 10),
+            new LinkInfo("127.0.0.1", 8342, "192.168.0.1", 8430, 5)
+        };
+
         return Stream.of(
             Arguments.of(new Register("localhost", 5000)),
             Arguments.of(new RegisterResponse(Status.SUCCESS, "info")),
             Arguments.of(new Deregister("127.0.0.1", 5012)),
-            Arguments.of(new LinkWeights("2", 0, "8", 0, 0))
+            Arguments.of(new LinkWeights(links))
         );
     }
 }
