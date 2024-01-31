@@ -65,6 +65,7 @@ public class TestEvent {
             Arguments.of(new RegisterResponse(Status.SUCCESS, "info")),
             Arguments.of(new Deregister("127.0.0.1", 5012)),
             Arguments.of(new LinkWeights(links)),
+            Arguments.of(new TaskComplete("localhost", 5000)),
             Arguments.of(new TaskSummaryRequest())
         );
     }
