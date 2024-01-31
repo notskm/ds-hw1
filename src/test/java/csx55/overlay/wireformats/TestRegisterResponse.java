@@ -90,7 +90,13 @@ public class TestRegisterResponse {
         DataOutputStream dout = new DataOutputStream(bout);
 
         dout.writeInt(Protocol.REGISTER_RESPONSE.ordinal());
-        dout.writeInt(status.ordinal());
+        // dout.writeInt(status.ordinal());
+        if(status == Status.SUCCESS) {
+            dout.writeByte(0);
+        }
+        else {
+            dout.writeByte(1);
+        }
         dout.writeInt(info.length());
         dout.writeBytes(info);
 
