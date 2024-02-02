@@ -12,19 +12,19 @@ public class MessagingNodesList extends Event {
     public MessagingNodesList(MessagingNodeInfo[] nodes) {
         nodeInfo = nodes;
     }
-    
+
     public MessagingNodesList(byte[] bytes) throws IOException {
         ByteArrayInputStream bain = new ByteArrayInputStream(bytes);
         DataInputStream din = new DataInputStream(bain);
-        
+
         int type = din.readInt();
-        if(type != getType()) {
+        if (type != getType()) {
             throw new IOException();
         }
-        
+
         int nodeInfoLength = din.readInt();
         nodeInfo = new MessagingNodeInfo[nodeInfoLength];
-        for(int i = 0; i < nodeInfoLength; i++) {
+        for (int i = 0; i < nodeInfoLength; i++) {
             int hostnameLength = din.readInt();
             byte[] hostnameBytes = new byte[hostnameLength];
             din.readFully(hostnameBytes);
@@ -33,16 +33,16 @@ public class MessagingNodesList extends Event {
             nodeInfo[i] = new MessagingNodeInfo(hostname, port);
         }
     }
-    
+
     public MessagingNodeInfo[] getNodeInfo() {
         return nodeInfo;
     }
-    
+
     @Override
-	public int getType() {
+    public int getType() {
         return Protocol.MESSAGING_NODES_LIST.ordinal();
     }
-    
+
     @Override
     public byte[] getBytes() throws IOException {
         ByteArrayOutputStream baout = new ByteArrayOutputStream();
@@ -50,12 +50,12 @@ public class MessagingNodesList extends Event {
 
         dout.writeInt(getType());
         dout.writeInt(nodeInfo.length);
-        for(MessagingNodeInfo node : nodeInfo) {
+        for (MessagingNodeInfo node : nodeInfo) {
             dout.writeInt(node.getHostname().length());
             dout.writeBytes(node.getHostname());
             dout.writeInt(node.getPort());
         }
-        
+
         byte[] bytes = baout.toByteArray();
         baout.close();
         return bytes;
