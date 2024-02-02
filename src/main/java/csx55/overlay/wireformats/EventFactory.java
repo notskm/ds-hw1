@@ -9,42 +9,43 @@ public class EventFactory {
     private static Protocol[] protocolValues = Protocol.values();
 
     public static EventFactory getInstance() {
-        if(instance == null) {
+        if (instance == null) {
             instance = new EventFactory();
         }
 
         return instance;
     }
-    
+
     private EventFactory() {
     }
-    
+
     public Event getEvent(byte[] data) {
-        if(data.length < 1) {
+        if (data.length < 1) {
             return null;
         }
 
         try {
             Protocol type = readEventType(data);
-            switch(type) {
+            switch (type) {
                 case REGISTER_REQUEST:
                     return new Register(data);
                 case REGISTER_RESPONSE:
                     return new RegisterResponse(data);
+                case MESSAGING_NODES_LIST:
+                    return new MessagingNodesList(data);
                 default:
                     return null;
             }
-        }
-        catch(IOException e) {
+        } catch (IOException e) {
             System.err.println(e);
             return null;
         }
     }
-    
+
     private Protocol readEventType(byte[] data) throws IOException {
         ByteArrayInputStream bain = new ByteArrayInputStream(data);
         DataInputStream din = new DataInputStream(bain);
-        
+
         int typeOrdinal = din.readInt();
 
         return protocolValues[typeOrdinal];
