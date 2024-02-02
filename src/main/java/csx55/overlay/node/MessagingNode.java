@@ -1,5 +1,7 @@
 package csx55.overlay.node;
 
+import java.net.InetAddress;
+import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.io.IOException;
@@ -8,21 +10,41 @@ import java.io.DataInputStream;
 import csx55.overlay.transport.TCPSender;
 import csx55.overlay.wireformats.Event;
 import csx55.overlay.wireformats.EventFactory;
+import csx55.overlay.wireformats.MessagingNodeInfo;
+import csx55.overlay.wireformats.MessagingNodesList;
+import csx55.overlay.wireformats.Protocol;
 import csx55.overlay.wireformats.Register;
 import csx55.overlay.wireformats.RegisterResponse;
 
 public class MessagingNode {
+    private static ServerSocket serverSocket;
+
     public static void main(String[] args) {
         parseArgs(args);
 
         try (Socket registrySocket = new Socket(registryHost, registryPort)) {
+            serverSocket = new ServerSocket(0);
             sendRegisterRequest(registrySocket);
             DataInputStream dis = new DataInputStream(registrySocket.getInputStream());
-            int dataLength = dis.readInt();
-            byte[] data = new byte[dataLength];
-            dis.readFully(data);
-            Event event = EventFactory.getInstance().getEvent(data);
-            System.out.println(((RegisterResponse)event).getInfo());
+            while (true) {
+                int dataLength = dis.readInt();
+                byte[] data = new byte[dataLength];
+                dis.readFully(data);
+                Event event = EventFactory.getInstance().getEvent(data);
+                System.out.println(event);
+
+                if (event.getType() == Protocol.REGISTER_RESPONSE.ordinal()) {
+                    System.out.println(((RegisterResponse) event).getInfo());
+                } else if (event.getType() == Protocol.MESSAGING_NODES_LIST.ordinal()) {
+                    MessagingNodesList list = (MessagingNodesList) event;
+                    MessagingNodeInfo[] nodes = list.getNodeInfo();
+                    for (MessagingNodeInfo node : nodes) {
+                        System.out.println(node.getHostname());
+                        System.out.println(node.getPort());
+                    }
+                    return;
+                }
+            }
         } catch (UnknownHostException e) {
             System.err.println("Unknown host: " + registryHost);
             System.err.println(e.getMessage());
@@ -35,7 +57,10 @@ public class MessagingNode {
     }
 
     private static void sendRegisterRequest(Socket socket) throws IOException {
-        new TCPSender(socket).send(new Register("127.0.0.1", 5001));
+        int port = serverSocket.getLocalPort();
+        String ipAddress = InetAddress.getLocalHost().getHostAddress();
+
+        new TCPSender(socket).send(new Register(ipAddress, port));
     }
 
     private static void parseArgs(String[] args) {

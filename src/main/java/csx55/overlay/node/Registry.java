@@ -2,7 +2,6 @@ package csx55.overlay.node;
 
 import java.net.Socket;
 import java.util.ArrayList;
-import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.io.IOException;
 
@@ -73,8 +72,7 @@ public class Registry {
         RegisterResponse.Status status = Status.SUCCESS;
         String message = "";
 
-        InetSocketAddress socketAddress = (InetSocketAddress) socket.getRemoteSocketAddress();
-        String socketIP = socketAddress.getAddress().getHostAddress();
+        String socketIP = socket.getLocalAddress().getHostAddress();
         if (!socketIP.equals(register.getIpAddress())) {
             status = Status.FAILURE;
 
