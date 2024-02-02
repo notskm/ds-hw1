@@ -1,0 +1,28 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Current File",
+            "request": "launch",
+            "mainClass": "${file}"
+        },
+        {
+            "type": "java",
+            "name": "MessagingNode",
+            "request": "launch",
+            "mainClass": "csx55.overlay.node.MessagingNode",
+            "projectName": "ds-hw1"
+        },
+        {
+            "type": "java",
+            "name": "Registry",
+            "request": "launch",
+            "mainClass": "csx55.overlay.node.Registry",
+            "projectName": "ds-hw1"
+        }
+    ]
+}
