@@ -7,6 +7,8 @@ public class MessagingNodeInfo {
     private int portNum;
 
     public MessagingNodeInfo(String host, int port) {
+        hostname = host;
+        portNum = port;
     }
 
     public String getHostname() {
