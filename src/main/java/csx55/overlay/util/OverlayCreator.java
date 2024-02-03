@@ -4,10 +4,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
 
-import csx55.overlay.transport.TCPSender;
+// import csx55.overlay.transport.TCPSender;
 import csx55.overlay.wireformats.LinkInfo;
 import csx55.overlay.wireformats.MessagingNodeInfo;
-import csx55.overlay.wireformats.MessagingNodesList;
+// import csx55.overlay.wireformats.MessagingNodesList;
 
 public class OverlayCreator {
     final ArrayList<MessagingNodeInfo> messagingNodes;
