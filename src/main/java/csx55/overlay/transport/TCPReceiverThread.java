@@ -15,11 +15,13 @@ public class TCPReceiverThread extends Thread {
     Socket receiverSocket;
     Queue<Event> eventQueue;
     EventFactory eventFactory;
+    final String socketIp;
 
     public TCPReceiverThread(Socket socket) {
         receiverSocket = socket;
         eventQueue = new LinkedList<>();
         eventFactory = EventFactory.getInstance();
+        socketIp = socket.getLocalAddress().getHostAddress();
     }
 
     public void run() {
@@ -27,7 +29,7 @@ public class TCPReceiverThread extends Thread {
             while (!receiverSocket.isClosed()) {
                 waitThenQueueEvent(dis);
             }
-        } catch(EOFException e) {
+        } catch (EOFException e) {
             System.err.println("TCPReceiverThread reached the end of the input stream");
         } catch (IOException e) {
             System.err.println(e.getMessage());
@@ -36,6 +38,8 @@ public class TCPReceiverThread extends Thread {
 
     private void waitThenQueueEvent(DataInputStream dis) throws IOException {
         Event event = readEvent(dis);
+        event.setOriginIp(socketIp);
+        event.setOriginSocket(receiverSocket);
         enqueueEvent(event);
     }
 

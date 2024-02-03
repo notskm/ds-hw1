@@ -1,8 +1,63 @@
 package csx55.overlay.node;
 
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.ArrayList;
+
+import csx55.overlay.transport.TCPReceiverThread;
+import csx55.overlay.transport.TCPServerThread;
 import csx55.overlay.wireformats.*;
 
 public class Node {
+    private int actualServerPort;
+    protected TCPServerThread serverThread;
+    protected ArrayList<TCPReceiverThread> receiverThreads;
+
+    Node() {
+        receiverThreads = new ArrayList<>();
+    }
+
+    public void run(int serverPort) throws IOException {
+        ServerSocket serverSocket = new ServerSocket(serverPort);
+        serverThread = new TCPServerThread(serverSocket);
+        serverThread.start();
+
+        actualServerPort = serverSocket.getLocalPort();
+
+        initialize();
+
+        while (true) {
+            pollForSockets();
+            pollForEvents();
+        }
+    }
+
+    protected void initialize() {
+    }
+
+    protected int getActualServerPort() {
+        return actualServerPort;
+    }
+
+    private void pollForSockets() {
+        Socket socket = serverThread.poll();
+        if (socket != null) {
+            TCPReceiverThread thread = new TCPReceiverThread(socket);
+            receiverThreads.add(thread);
+            thread.start();
+        }
+    }
+
+    private void pollForEvents() {
+        for (TCPReceiverThread thread : receiverThreads) {
+            Event event = thread.poll();
+            if (event != null) {
+                onEvent(event);
+            }
+        }
+    }
+
     public void onEvent(Event event) {
         Protocol eventType = Protocol.values()[event.getType()];
 

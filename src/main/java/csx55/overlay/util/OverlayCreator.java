@@ -84,9 +84,9 @@ public class OverlayCreator {
                 nodeInfos[j] = messagingNodes.get(nodeIndex);
             }
 
-            MessagingNodesList message = new MessagingNodesList(nodeInfos);
+            // MessagingNodesList message = new MessagingNodesList(nodeInfos);
 
-            new TCPSender(messagingNodes.get(i).getSocket()).send(message);
+            // new TCPSender(messagingNodes.get(i).getSocket()).send(message);
         }
     }
 }

@@ -6,8 +6,12 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.net.Socket;
 
 abstract public class Event {
+    Socket originSocket;
+    String originIp;
+
     public Event() {
 
     }
@@ -15,8 +19,8 @@ abstract public class Event {
     public Event(byte[] marshalledBytes) throws IOException {
         ByteArrayInputStream bain = new ByteArrayInputStream(marshalledBytes);
         DataInputStream din = new DataInputStream(bain);
-        
-        if(getType() != din.readInt()) {
+
+        if (getType() != din.readInt()) {
             throw new IOException();
         }
 
@@ -30,8 +34,7 @@ abstract public class Event {
                     field.set(this, new String(stringData));
                 } else if (field.getType() == int.class) {
                     field.set(this, din.readInt());
-                }
-                else if(field.getType() == byte.class) {
+                } else if (field.getType() == byte.class) {
                     field.set(this, din.readByte());
                 }
             } catch (IllegalAccessException e) {
@@ -70,4 +73,20 @@ abstract public class Event {
     }
 
     abstract public int getType();
+
+    public Socket getOriginSocket() {
+        return originSocket;
+    }
+
+    public void setOriginSocket(Socket socket) {
+        originSocket = socket;
+    }
+
+    public String getOriginIp() {
+        return originIp;
+    };
+
+    public void setOriginIp(String ip) {
+        originIp = ip;
+    }
 }

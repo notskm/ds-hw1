@@ -1,66 +1,27 @@
 package csx55.overlay.node;
 
 import java.net.InetAddress;
-import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.io.IOException;
-import java.io.DataInputStream;
 
+import csx55.overlay.transport.TCPReceiverThread;
 import csx55.overlay.transport.TCPSender;
-import csx55.overlay.wireformats.Event;
-import csx55.overlay.wireformats.EventFactory;
 import csx55.overlay.wireformats.MessagingNodeInfo;
 import csx55.overlay.wireformats.MessagingNodesList;
-import csx55.overlay.wireformats.Protocol;
 import csx55.overlay.wireformats.Register;
 import csx55.overlay.wireformats.RegisterResponse;
 
-public class MessagingNode {
-    private static ServerSocket serverSocket;
+public class MessagingNode extends Node {
+    static private String registryHost = "127.0.0.1";
+    static private int registryPort = 5000;
 
     public static void main(String[] args) {
-        parseArgs(args);
-
-        try (Socket registrySocket = new Socket(registryHost, registryPort)) {
-            serverSocket = new ServerSocket(0);
-            sendRegisterRequest(registrySocket);
-            DataInputStream dis = new DataInputStream(registrySocket.getInputStream());
-            while (true) {
-                int dataLength = dis.readInt();
-                byte[] data = new byte[dataLength];
-                dis.readFully(data);
-                Event event = EventFactory.getInstance().getEvent(data);
-                System.out.println(event);
-
-                if (event.getType() == Protocol.REGISTER_RESPONSE.ordinal()) {
-                    System.out.println(((RegisterResponse) event).getInfo());
-                } else if (event.getType() == Protocol.MESSAGING_NODES_LIST.ordinal()) {
-                    MessagingNodesList list = (MessagingNodesList) event;
-                    MessagingNodeInfo[] nodes = list.getNodeInfo();
-                    for (MessagingNodeInfo node : nodes) {
-                        System.out.println(node.getHostname());
-                        System.out.println(node.getPort());
-                    }
-                    return;
-                }
-            }
-        } catch (UnknownHostException e) {
-            System.err.println("Unknown host: " + registryHost);
+        try {
+            parseArgs(args);
+            new MessagingNode().run(0);
+        } catch (Exception e) {
             System.err.println(e.getMessage());
-            System.exit(1);
-        } catch (IOException e) {
-            System.err.println("Unable to reach registry at " + registryHost + ":" + registryPort);
-            System.err.println(e.getMessage());
-            System.exit(1);
         }
-    }
-
-    private static void sendRegisterRequest(Socket socket) throws IOException {
-        int port = serverSocket.getLocalPort();
-        String ipAddress = InetAddress.getLocalHost().getHostAddress();
-
-        new TCPSender(socket).send(new Register(ipAddress, port));
     }
 
     private static void parseArgs(String[] args) {
@@ -82,6 +43,39 @@ public class MessagingNode {
         }
     }
 
-    static private String registryHost = "127.0.0.1";
-    static private int registryPort = 5000;
+    @Override
+    protected void onRegisterResponse(RegisterResponse response) {
+        System.out.println(response.getInfo());
+    }
+
+    @Override
+    protected void onMessagingNodesList(MessagingNodesList nodes) {
+        for (MessagingNodeInfo node : nodes.getNodeInfo()) {
+            System.out.println(node.getHostname());
+            System.out.println(node.getPort());
+        }
+    }
+
+    @Override
+    protected final void initialize() {
+        Socket registrySocket = null;
+
+        try {
+            registrySocket = new Socket(registryHost, registryPort);
+            TCPReceiverThread registryReceiver = new TCPReceiverThread(registrySocket);
+            registryReceiver.start();
+            receiverThreads.add(registryReceiver);
+
+            sendRegisterRequest(registrySocket);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to open registry socket");
+        }
+    }
+
+    private void sendRegisterRequest(Socket socket) throws IOException {
+        int port = getActualServerPort();
+        String ipAddress = InetAddress.getLocalHost().getHostAddress();
+
+        new TCPSender(socket).send(new Register(ipAddress, port));
+    }
 }
