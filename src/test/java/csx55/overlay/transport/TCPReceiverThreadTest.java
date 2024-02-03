@@ -9,6 +9,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.InetAddress;
 import java.net.Socket;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -19,10 +20,15 @@ import csx55.overlay.wireformats.Register;
 
 public class TCPReceiverThreadTest {
     Socket receiverSocket;
+    InetAddress receiverAddress;
 
     @BeforeEach
     void setup() {
         receiverSocket = mock(Socket.class);
+        receiverAddress = mock(InetAddress.class);
+
+        when(receiverSocket.getLocalAddress()).thenReturn(receiverAddress);
+        when(receiverAddress.getHostAddress()).thenReturn("0.0.0.0");
     }
 
     @Test
@@ -80,7 +86,7 @@ public class TCPReceiverThreadTest {
         dos.write(bytes);
         return bos.toByteArray();
     }
-    
+
     void addEventToSocketInputStream(Event event) {
         try {
             byte[] bytes = addLengthToByteArray(event.getBytes());
@@ -91,7 +97,7 @@ public class TCPReceiverThreadTest {
             fail(e.getMessage());
         }
     }
-    
+
     void closeSocketAndJoinThread(Socket socket, Thread thread) {
         try {
             socket.close();
@@ -102,5 +108,5 @@ public class TCPReceiverThreadTest {
             fail(e.getMessage());
         }
     }
-    
+
 }
