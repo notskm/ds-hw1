@@ -138,6 +138,9 @@ public class Node {
             case DEREGISTER_REQUEST:
                 onDeregisterRequest((Deregister) event);
                 break;
+            case DEREGISTER_RESPONSE:
+                onDeregisterResponse((DeregisterResponse) event);
+                break;
             case MESSAGING_NODES_LIST:
                 onMessagingNodesList((MessagingNodesList) event);
                 break;
@@ -166,6 +169,10 @@ public class Node {
     }
 
     protected void onDeregisterRequest(Deregister event) {
+
+    }
+
+    protected void onDeregisterResponse(DeregisterResponse event) {
 
     }
 

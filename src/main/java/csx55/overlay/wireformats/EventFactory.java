@@ -33,6 +33,8 @@ public class EventFactory {
                     return new RegisterResponse(data);
                 case DEREGISTER_REQUEST:
                     return new Deregister(data);
+                case DEREGISTER_RESPONSE:
+                    return new DeregisterResponse(data);
                 case MESSAGING_NODES_LIST:
                     return new MessagingNodesList(data);
                 case LINK_WEIGHTS:
