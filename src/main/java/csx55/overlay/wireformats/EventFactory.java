@@ -31,8 +31,18 @@ public class EventFactory {
                     return new Register(data);
                 case REGISTER_RESPONSE:
                     return new RegisterResponse(data);
+                case DEREGISTER_REQUEST:
+                    return new Deregister(data);
                 case MESSAGING_NODES_LIST:
                     return new MessagingNodesList(data);
+                case LINK_WEIGHTS:
+                    return new LinkWeights(data);
+                case TASK_INITIATE:
+                    return new TaskInitiate(data);
+                case FULL_TRAFFIC_SUMMARY:
+                    return new TaskSummaryRequest(data);
+                case TRAFFIC_SUMMARY:
+                    return new TaskSummaryResponse(data);
                 default:
                     return null;
             }
