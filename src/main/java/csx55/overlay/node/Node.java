@@ -7,15 +7,18 @@ import java.util.ArrayList;
 
 import csx55.overlay.transport.TCPReceiverThread;
 import csx55.overlay.transport.TCPServerThread;
+import csx55.overlay.util.InputReceiverThread;
 import csx55.overlay.wireformats.*;
 
 public class Node {
     private int actualServerPort;
     protected TCPServerThread serverThread;
     protected ArrayList<TCPReceiverThread> receiverThreads;
+    private InputReceiverThread inputThread;
 
     Node() {
         receiverThreads = new ArrayList<>();
+        inputThread = new InputReceiverThread();
     }
 
     public void run(int serverPort) throws IOException {
@@ -23,11 +26,14 @@ public class Node {
         serverThread = new TCPServerThread(serverSocket);
         serverThread.start();
 
+        inputThread.start();
+
         actualServerPort = serverSocket.getLocalPort();
 
         initialize();
 
         while (true) {
+            pollForInput();
             pollForSockets();
             pollForEvents();
         }
@@ -38,6 +44,67 @@ public class Node {
 
     protected int getActualServerPort() {
         return actualServerPort;
+    }
+
+    private void pollForInput() {
+        String input = inputThread.poll();
+        if (input == null) {
+            return;
+        }
+        String[] args = input.split("\\s+");
+
+        String commandName = args[0];
+        try {
+            if (commandName.equals("list-messaging-nodes")) {
+                listMessagingNodes();
+            } else if (commandName.equals("list-weights")) {
+                listWeights();
+            } else if (commandName.equals("setup-overlay") && args.length > 1) {
+                final int connections = Integer.parseInt(args[1]);
+                setupOverlay(connections);
+            } else if (commandName.equals("send-overlay-link-weights")) {
+                sendOverlayLinkWeights();
+            } else if (commandName.equals("start") && args.length > 1) {
+                final int rounds = Integer.parseInt(args[1]);
+                start(rounds);
+            } else if (commandName.equals("print-shortest-path")) {
+                printShortestPath();
+            } else if (commandName.equals("exit-overlay")) {
+                exitOverlay();
+            } else {
+                System.out.println("Invalid command: " + input);
+            }
+        } catch (NumberFormatException | UnsupportedOperationException e) {
+            System.out.println("Invalid command: " + input);
+        }
+    }
+
+    protected void listMessagingNodes() {
+        throw new UnsupportedOperationException("Unimplemented method 'listMessagingNodes'");
+    }
+
+    protected void listWeights() {
+        throw new UnsupportedOperationException("Unimplemented method 'listMessagingNodes'");
+    }
+
+    protected void setupOverlay(int connections) {
+        throw new UnsupportedOperationException("Unimplemented method 'listMessagingNodes'");
+    }
+
+    protected void sendOverlayLinkWeights() {
+        throw new UnsupportedOperationException("Unimplemented method 'listMessagingNodes'");
+    }
+
+    protected void start(int rounds) {
+        throw new UnsupportedOperationException("Unimplemented method 'listMessagingNodes'");
+    }
+
+    protected void printShortestPath() {
+        throw new UnsupportedOperationException("Unimplemented method 'listMessagingNodes'");
+    }
+
+    protected void exitOverlay() {
+        throw new UnsupportedOperationException("Unimplemented method 'listMessagingNodes'");
     }
 
     private void pollForSockets() {
