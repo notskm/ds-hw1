@@ -2,6 +2,8 @@ package csx55.overlay.node;
 
 import java.net.InetAddress;
 import java.net.Socket;
+import java.util.HashMap;
+import java.util.Map;
 import java.io.IOException;
 
 import csx55.overlay.transport.TCPReceiverThread;
@@ -12,12 +14,13 @@ public class MessagingNode extends Node {
     static private String registryHost = "127.0.0.1";
     static private int registryPort = 5000;
     Socket registrySocket;
+    Map<MessagingNodeInfo, Socket> messagingNodes;
 
     public static void main(String[] args) {
         try {
             parseArgs(args);
             new MessagingNode().run(0);
-        } catch (Exception e) {
+        } catch (IOException e) {
             System.err.println(e.getMessage());
         }
     }
@@ -41,6 +44,10 @@ public class MessagingNode extends Node {
         }
     }
 
+    private MessagingNode() {
+        messagingNodes = new HashMap<>();
+    }
+
     @Override
     protected void onRegisterResponse(RegisterResponse response) {
         System.out.println(response.getInfo());
@@ -48,10 +55,27 @@ public class MessagingNode extends Node {
 
     @Override
     protected void onMessagingNodesList(MessagingNodesList nodes) {
-        for (MessagingNodeInfo node : nodes.getNodeInfo()) {
-            System.out.println(node.getHostname());
-            System.out.println(node.getPort());
+        try {
+            int numConnections = 0;
+            for (MessagingNodeInfo node : nodes.getNodeInfo()) {
+                Socket socket = new Socket(node.getHostname(), node.getPort());
+                Register register = new Register(getServerHostname(), getActualServerPort());
+                new TCPSender(socket).send(register);
+
+                receiverThreads.add(new TCPReceiverThread(socket));
+                messagingNodes.put(node, socket);
+                numConnections++;
+            }
+            System.out.printf("All connections are established. Number of connections: %d%n", numConnections);
+        } catch (IOException e) {
+
         }
+    }
+
+    @Override
+    protected void onRegisterRequest(Register register) {
+        MessagingNodeInfo node = new MessagingNodeInfo(register.getIpAddress(), register.getPortNumber());
+        messagingNodes.put(node, register.getOriginSocket());
     }
 
     @Override
