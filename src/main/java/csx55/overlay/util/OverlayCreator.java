@@ -1,35 +1,47 @@
 package csx55.overlay.util;
 
 import java.io.IOException;
+import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.Random;
 
-// import csx55.overlay.transport.TCPSender;
+import csx55.overlay.transport.TCPSender;
 import csx55.overlay.wireformats.LinkInfo;
 import csx55.overlay.wireformats.MessagingNodeInfo;
-// import csx55.overlay.wireformats.MessagingNodesList;
+import csx55.overlay.wireformats.MessagingNodesList;
 
 public class OverlayCreator {
     final ArrayList<MessagingNodeInfo> messagingNodes;
-    ArrayList<LinkInfo> links;
-    int[] connectionCounts;
-    ArrayList<ArrayList<Integer>> connections;
     final int perNodeConnectionLimit;
 
-    public OverlayCreator(ArrayList<MessagingNodeInfo> nodes, int connectionLimit) {
-        messagingNodes = nodes;
+    final Map<MessagingNodeInfo, Socket> socketTable;
+
+    int[] connectionCounts;
+    ArrayList<ArrayList<Integer>> connections;
+    ArrayList<LinkInfo> links;
+
+    public OverlayCreator(Map<MessagingNodeInfo, Socket> nodes, int connectionLimit) {
+        socketTable = nodes;
+        perNodeConnectionLimit = connectionLimit;
+
+        messagingNodes = new ArrayList<>();
+        for (MessagingNodeInfo nodeInfo : nodes.keySet()) {
+            messagingNodes.add(nodeInfo);
+        }
+
         connectionCounts = new int[nodes.size()];
         connections = new ArrayList<>(nodes.size());
         for (int i = 0; i < nodes.size(); i++) {
             connections.add(new ArrayList<>());
         }
         links = new ArrayList<>();
-        perNodeConnectionLimit = connectionLimit;
     }
 
-    public void createOverlay() throws IOException {
+    public LinkInfo[] createOverlay() throws IOException {
         connectNodes();
         publishConnections();
+        return (LinkInfo[]) links.toArray();
     }
 
     private void connectNodes() {
@@ -84,9 +96,10 @@ public class OverlayCreator {
                 nodeInfos[j] = messagingNodes.get(nodeIndex);
             }
 
-            // MessagingNodesList message = new MessagingNodesList(nodeInfos);
+            MessagingNodesList message = new MessagingNodesList(nodeInfos);
 
-            // new TCPSender(messagingNodes.get(i).getSocket()).send(message);
+            final Socket socket = socketTable.get(messagingNodes.get(i));
+            new TCPSender(socket).send(message);
         }
     }
 }
