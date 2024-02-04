@@ -6,6 +6,8 @@ import java.io.IOException;
 
 import csx55.overlay.transport.TCPSender;
 import csx55.overlay.util.OverlayCreator;
+import csx55.overlay.wireformats.Deregister;
+import csx55.overlay.wireformats.DeregisterResponse;
 import csx55.overlay.wireformats.LinkInfo;
 import csx55.overlay.wireformats.MessagingNodeInfo;
 import csx55.overlay.wireformats.Register;
@@ -84,7 +86,7 @@ public class Registry extends Node {
     }
 
     private RegisterResponse getRegistrationNodeAlreadyExistsResponse(Register event) {
-        String message = "Registration request unsuccessful. The socket '";
+        String message = "Registration request unsuccessful. The node '";
         message += event.getIpAddress() + ":" + event.getPortNumber();
         message += "' already exists within the registry.";
 
@@ -145,6 +147,44 @@ public class Registry extends Node {
             OverlayCreator creator = new OverlayCreator(messagingNodes, connectionLimit);
             links = creator.createOverlay();
         } catch (IOException e) {
+        }
+    }
+
+    @Override
+    protected final void onDeregisterRequest(Deregister event) {
+        MessagingNodeInfo node = new MessagingNodeInfo(event.getIpAddress(), event.getPort());
+
+        DeregisterResponse.Status status = null;
+        String message = null;
+
+        String socketIP = event.getOriginIp();
+        String requestIp = event.getIpAddress();
+        Socket originSocket = event.getOriginSocket();
+
+        if (!socketIP.equals(requestIp)) {
+            status = DeregisterResponse.Status.FAILURE;
+            message = "Deregistration request unsuccessful. The provided IP address ";
+            message += event.getIpAddress();
+            message += " does not match the node's ip address ";
+            message += socketIP;
+        } else if (!messagingNodes.containsKey(node)) {
+            status = DeregisterResponse.Status.FAILURE;
+            message = "not in registry";
+            message = "Deregistration request unsuccessful. The node '";
+            message += node.getHostname() + ":" + node.getPort();
+            message += " does not exist in the registry";
+        } else {
+            deregisterNode(node);
+            status = DeregisterResponse.Status.SUCCESS;
+            message = "Deregistration successful.";
+        }
+
+        DeregisterResponse response = new DeregisterResponse(status, message);
+
+        try {
+            new TCPSender(originSocket).send(response);
+        } catch (IOException e) {
+            deregisterNode(node);
         }
     }
 }

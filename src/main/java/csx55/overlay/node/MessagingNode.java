@@ -6,14 +6,12 @@ import java.io.IOException;
 
 import csx55.overlay.transport.TCPReceiverThread;
 import csx55.overlay.transport.TCPSender;
-import csx55.overlay.wireformats.MessagingNodeInfo;
-import csx55.overlay.wireformats.MessagingNodesList;
-import csx55.overlay.wireformats.Register;
-import csx55.overlay.wireformats.RegisterResponse;
+import csx55.overlay.wireformats.*;
 
 public class MessagingNode extends Node {
     static private String registryHost = "127.0.0.1";
     static private int registryPort = 5000;
+    Socket registrySocket;
 
     public static void main(String[] args) {
         try {
@@ -58,8 +56,6 @@ public class MessagingNode extends Node {
 
     @Override
     protected final void initialize() {
-        Socket registrySocket = null;
-
         try {
             registrySocket = new Socket(registryHost, registryPort);
             TCPReceiverThread registryReceiver = new TCPReceiverThread(registrySocket);
@@ -77,5 +73,22 @@ public class MessagingNode extends Node {
         String ipAddress = InetAddress.getLocalHost().getHostAddress();
 
         new TCPSender(socket).send(new Register(ipAddress, port));
+    }
+
+    @Override
+    protected final void exitOverlay() {
+        try {
+            Deregister deregister = new Deregister(getServerHostname(), getActualServerPort());
+            new TCPSender(registrySocket).send(deregister);
+        } catch (IOException e) {
+            System.err.println(e.getMessage());
+            System.exit(-1);
+        }
+    }
+
+    @Override
+    protected final void onDeregisterResponse(DeregisterResponse response) {
+        System.out.println(response.getInfo());
+        System.exit(0);
     }
 }

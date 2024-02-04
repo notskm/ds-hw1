@@ -1,8 +1,10 @@
 package csx55.overlay.node;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 
 import csx55.overlay.transport.TCPReceiverThread;
@@ -40,6 +42,10 @@ public class Node {
     }
 
     protected void initialize() {
+    }
+
+    protected String getServerHostname() throws UnknownHostException {
+        return InetAddress.getLocalHost().getHostAddress();
     }
 
     protected int getActualServerPort() {
