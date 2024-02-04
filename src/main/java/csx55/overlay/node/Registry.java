@@ -145,6 +145,18 @@ public class Registry extends Node {
     }
 
     @Override
+    protected final void start(int rounds) {
+        TaskInitiate initiate = new TaskInitiate(rounds);
+        try {
+            for (Socket socket : messagingNodes.values()) {
+                new TCPSender(socket).send(initiate);
+            }
+        } catch (IOException e) {
+
+        }
+    }
+
+    @Override
     protected final void onDeregisterRequest(Deregister event) {
         MessagingNodeInfo node = new MessagingNodeInfo(event.getIpAddress(), event.getPort());
 
