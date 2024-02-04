@@ -133,9 +133,16 @@ public class Registry extends Node {
     }
 
     @Override
-    protected final void setupOverlay(int connections) {
+    protected final void setupOverlay(int connectionLimit) {
+        int nodeCount = messagingNodes.size();
+        if (nodeCount < connectionLimit) {
+            String errorMessage = "Connection limit (%d) is greater than the number of registered nodes (%d)%n";
+            System.out.printf(errorMessage, connectionLimit, nodeCount);
+            return;
+        }
+
         try {
-            OverlayCreator creator = new OverlayCreator(messagingNodes, connections);
+            OverlayCreator creator = new OverlayCreator(messagingNodes, connectionLimit);
             links = creator.createOverlay();
         } catch (IOException e) {
         }
