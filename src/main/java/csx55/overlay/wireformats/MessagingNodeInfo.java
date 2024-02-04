@@ -31,4 +31,9 @@ public class MessagingNodeInfo {
     public int hashCode() {
         return Objects.hash(hostname, portNum);
     }
+
+    @Override
+    public String toString() {
+        return getHostname() + ':' + getPort();
+    }
 }

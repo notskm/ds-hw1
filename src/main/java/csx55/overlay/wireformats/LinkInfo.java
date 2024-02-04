@@ -1,39 +1,39 @@
 package csx55.overlay.wireformats;
 
 public class LinkInfo {
-    String hostnameA;
-    int linkPortA;
-
-    String hostnameB;
-    int linkPortB;
+    MessagingNodeInfo nodeA;
+    MessagingNodeInfo nodeB;
 
     int linkWeight;
 
     public LinkInfo(String hostA, int portA, String hostB, int portB, int weight) {
-        hostnameA = hostA;
-        hostnameB = hostB;
-        linkPortA = portA;
-        linkPortB = portB;
+        nodeA = new MessagingNodeInfo(hostA, portA);
+        nodeB = new MessagingNodeInfo(hostB, portB);
         linkWeight = weight;
     }
 
     public String getHostnameA() {
-        return hostnameA;
+        return nodeA.getHostname();
     }
 
     public String getHostnameB() {
-        return hostnameB;
+        return nodeB.getHostname();
     }
 
     public int getPortA() {
-        return linkPortA;
+        return nodeA.getPort();
     }
 
     public int getPortB() {
-        return linkPortB;
+        return nodeB.getPort();
     }
 
     public Integer getWeight() {
         return linkWeight;
+    }
+
+    @Override
+    public String toString() {
+        return nodeA.toString() + ' ' + nodeB.toString() + ' ' + getWeight();
     }
 }

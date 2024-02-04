@@ -48,7 +48,7 @@ public class Registry extends Node {
         if (!socketIP.equals(requestIp)) {
             response = getRegistrationIpMismatchResponse(register, socketIP);
         } else if (messagingNodes.containsKey(node)) {
-            response = getRegistrationNodeAlreadyExistsResponse(register);
+            response = getRegistrationNodeAlreadyExistsResponse(node);
         } else {
             registerNode(node, originSocket);
             response = getRegistrationSuccessfulMessage(register);
@@ -85,9 +85,9 @@ public class Registry extends Node {
         return new RegisterResponse(Status.FAILURE, message);
     }
 
-    private RegisterResponse getRegistrationNodeAlreadyExistsResponse(Register event) {
+    private RegisterResponse getRegistrationNodeAlreadyExistsResponse(MessagingNodeInfo node) {
         String message = "Registration request unsuccessful. The node '";
-        message += event.getIpAddress() + ":" + event.getPortNumber();
+        message += node;
         message += "' already exists within the registry.";
 
         return new RegisterResponse(Status.FAILURE, message);
@@ -109,28 +109,15 @@ public class Registry extends Node {
 
     @Override
     protected final void listMessagingNodes() {
-        for (MessagingNodeInfo nodes : messagingNodes.keySet()) {
-            String message = "";
-            message += nodes.getHostname();
-            message += ":";
-            message += nodes.getPort();
-            System.out.println(message);
+        for (MessagingNodeInfo node : messagingNodes.keySet()) {
+            System.out.println(node);
         }
     }
 
     @Override
     protected final void listWeights() {
         for (LinkInfo link : links) {
-            String linkString = link.getHostnameA();
-            linkString += ":";
-            linkString += link.getPortA();
-            linkString += " ";
-            linkString += link.getHostnameB();
-            linkString += ":";
-            linkString += link.getPortB();
-            linkString += " ";
-            linkString += link.getWeight();
-            System.out.println(linkString);
+            System.out.println(link);
         }
     }
 
@@ -171,7 +158,7 @@ public class Registry extends Node {
             status = DeregisterResponse.Status.FAILURE;
             message = "not in registry";
             message = "Deregistration request unsuccessful. The node '";
-            message += node.getHostname() + ":" + node.getPort();
+            message += node;
             message += " does not exist in the registry";
         } else {
             deregisterNode(node);
