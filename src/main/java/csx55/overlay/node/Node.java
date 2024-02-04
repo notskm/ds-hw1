@@ -54,9 +54,10 @@ public class Node {
 
     private void pollForInput() {
         String input = inputThread.poll();
-        if (input == null) {
+        if (input == null || input.isEmpty()) {
             return;
         }
+
         String[] args = input.split("\\s+");
 
         String commandName = args[0];
