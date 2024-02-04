@@ -20,11 +20,11 @@ public class Deregister extends Event {
         return Protocol.DEREGISTER_REQUEST.ordinal();
     }
 
-    public Object getIpAddress() {
+    public String getIpAddress() {
         return ipAddress;
     }
 
-	public Integer getPort() {
+    public Integer getPort() {
         return portNumber;
-	}
+    }
 }
