@@ -6,6 +6,8 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Queue;
 
 import csx55.overlay.transport.TCPReceiverThread;
 import csx55.overlay.transport.TCPServerThread;
@@ -123,12 +125,17 @@ public class Node {
         }
     }
 
+    Queue<Event> eventQueue = new LinkedList<>();
+
     private void pollForEvents() {
         for (TCPReceiverThread thread : receiverThreads) {
             Event event = thread.poll();
             if (event != null) {
-                onEvent(event);
+                eventQueue.add(event);
             }
+        }
+        while (!eventQueue.isEmpty()) {
+            onEvent(eventQueue.remove());
         }
     }
 
