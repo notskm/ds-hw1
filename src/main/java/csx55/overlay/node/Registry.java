@@ -100,4 +100,15 @@ public class Registry extends Node {
             }
         }
     }
+
+    @Override
+    protected final void listMessagingNodes() {
+        for (MessagingNodeInfo nodes : messagingNodes.keySet()) {
+            String message = "";
+            message += nodes.getHostname();
+            message += ":";
+            message += nodes.getPort();
+            System.out.println(message);
+        }
+    }
 }
