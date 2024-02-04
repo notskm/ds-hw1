@@ -41,7 +41,7 @@ public class OverlayCreator {
     public LinkInfo[] createOverlay() throws IOException {
         connectNodes();
         publishConnections();
-        return (LinkInfo[]) links.toArray();
+        return links.toArray(new LinkInfo[links.size()]);
     }
 
     private void connectNodes() {

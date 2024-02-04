@@ -117,6 +117,22 @@ public class Registry extends Node {
     }
 
     @Override
+    protected final void listWeights() {
+        for (LinkInfo link : links) {
+            String linkString = link.getHostnameA();
+            linkString += ":";
+            linkString += link.getPortA();
+            linkString += " ";
+            linkString += link.getHostnameB();
+            linkString += ":";
+            linkString += link.getPortB();
+            linkString += " ";
+            linkString += link.getWeight();
+            System.out.println(linkString);
+        }
+    }
+
+    @Override
     protected final void setupOverlay(int connections) {
         try {
             OverlayCreator creator = new OverlayCreator(messagingNodes, connections);
