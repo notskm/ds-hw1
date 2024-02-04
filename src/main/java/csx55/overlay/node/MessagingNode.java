@@ -87,6 +87,16 @@ public class MessagingNode extends Node {
     }
 
     @Override
+    protected final void onLinkWeights(LinkWeights weights) {
+        constructMessagingNodeGraph(weights.getLinks());
+        System.out.println("Link weights received and processed. Ready to send messages.");
+    }
+
+    private void constructMessagingNodeGraph(LinkInfo[] links) {
+
+    }
+
+    @Override
     protected final void onDeregisterResponse(DeregisterResponse response) {
         System.out.println(response.getInfo());
         System.exit(0);

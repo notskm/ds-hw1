@@ -133,6 +133,18 @@ public class Registry extends Node {
     }
 
     @Override
+    protected final void sendOverlayLinkWeights() {
+        LinkWeights weights = new LinkWeights(links);
+        for (Socket node : messagingNodes.values()) {
+            try {
+                new TCPSender(node).send(weights);
+            } catch (IOException e) {
+
+            }
+        }
+    }
+
+    @Override
     protected final void onDeregisterRequest(Deregister event) {
         MessagingNodeInfo node = new MessagingNodeInfo(event.getIpAddress(), event.getPort());
 
