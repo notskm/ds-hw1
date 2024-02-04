@@ -6,12 +6,7 @@ import java.io.IOException;
 
 import csx55.overlay.transport.TCPSender;
 import csx55.overlay.util.OverlayCreator;
-import csx55.overlay.wireformats.Deregister;
-import csx55.overlay.wireformats.DeregisterResponse;
-import csx55.overlay.wireformats.LinkInfo;
-import csx55.overlay.wireformats.MessagingNodeInfo;
-import csx55.overlay.wireformats.Register;
-import csx55.overlay.wireformats.RegisterResponse;
+import csx55.overlay.wireformats.*;
 import csx55.overlay.wireformats.RegisterResponse.Status;
 
 public class Registry extends Node {
