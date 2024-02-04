@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.io.IOException;
 
 import csx55.overlay.transport.TCPSender;
+import csx55.overlay.util.OverlayCreator;
+import csx55.overlay.wireformats.LinkInfo;
 import csx55.overlay.wireformats.MessagingNodeInfo;
 import csx55.overlay.wireformats.Register;
 import csx55.overlay.wireformats.RegisterResponse;
@@ -12,6 +14,7 @@ import csx55.overlay.wireformats.RegisterResponse.Status;
 
 public class Registry extends Node {
     private HashMap<MessagingNodeInfo, Socket> messagingNodes;
+    private LinkInfo[] links;
     private static int serverPort = 5000;
 
     public static void main(String[] args) {
@@ -27,6 +30,7 @@ public class Registry extends Node {
         super();
         parseArgs(args);
         messagingNodes = new HashMap<>();
+        links = new LinkInfo[0];
     }
 
     @Override
@@ -109,6 +113,15 @@ public class Registry extends Node {
             message += ":";
             message += nodes.getPort();
             System.out.println(message);
+        }
+    }
+
+    @Override
+    protected final void setupOverlay(int connections) {
+        try {
+            OverlayCreator creator = new OverlayCreator(messagingNodes, connections);
+            links = creator.createOverlay();
+        } catch (IOException e) {
         }
     }
 }
