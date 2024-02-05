@@ -81,9 +81,12 @@ public class OverlayCreator {
         MessagingNodeInfo node1 = messagingNodes.get(socketIndex1);
         MessagingNodeInfo node2 = messagingNodes.get(socketIndex2);
         int weight = new Random().nextInt(10 - 1 + 1) + 1;
-        LinkInfo link = new LinkInfo(node1.getHostname(), node1.getPort(), node2.getHostname(), node2.getPort(),
+        LinkInfo link1 = new LinkInfo(node1.getHostname(), node1.getPort(), node2.getHostname(), node2.getPort(),
                 weight);
-        links.add(link);
+        LinkInfo link2 = new LinkInfo(node2.getHostname(), node2.getPort(), node1.getHostname(), node1.getPort(),
+                weight);
+        links.add(link1);
+        links.add(link2);
     }
 
     private void publishConnections() throws IOException {
