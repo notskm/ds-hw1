@@ -2,10 +2,13 @@ package csx55.overlay.node;
 
 import java.net.InetAddress;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
 import java.io.IOException;
 
+import csx55.overlay.dijkstra.Graph;
+import csx55.overlay.dijkstra.ShortestPath;
 import csx55.overlay.transport.TCPReceiverThread;
 import csx55.overlay.transport.TCPSender;
 import csx55.overlay.wireformats.*;
@@ -15,6 +18,8 @@ public class MessagingNode extends Node {
     static private int registryPort = 5000;
     Socket registrySocket;
     Map<MessagingNodeInfo, Socket> messagingNodes;
+    Map<MessagingNodeInfo, MessagingNodeInfo> shortestPaths = new HashMap<>();
+    Graph overlayGraph = new Graph(new LinkInfo[0]);
 
     public static void main(String[] args) {
         try {
@@ -117,7 +122,37 @@ public class MessagingNode extends Node {
     }
 
     private void constructMessagingNodeGraph(LinkInfo[] links) {
+        try {
+            ShortestPath pathComputer = new ShortestPath(links);
+            overlayGraph = new Graph(links);
+            MessagingNodeInfo thisNode = new MessagingNodeInfo(getServerHostname(), getActualServerPort());
+            Map<MessagingNodeInfo, MessagingNodeInfo> paths = pathComputer.computeShortestPaths(thisNode);
+            shortestPaths = paths;
+        } catch (UnknownHostException e) {
+            System.out.println("Error");
+        }
+    }
 
+    @Override
+    protected final void printShortestPath() {
+        for (MessagingNodeInfo node : shortestPaths.keySet()) {
+            printPathToNode(node);
+        }
+    }
+
+    private void printPathToNode(MessagingNodeInfo destination) {
+        String output = destination.toString();
+
+        MessagingNodeInfo predecessor = shortestPaths.get(destination);
+
+        while (predecessor != null) {
+            int weight = overlayGraph.edge(predecessor, destination).weight;
+            output = predecessor + "--" + weight + "--" + output;
+            destination = predecessor;
+            predecessor = shortestPaths.get(predecessor);
+        }
+
+        System.out.println(output);
     }
 
     @Override
