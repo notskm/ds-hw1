@@ -47,7 +47,7 @@ public class Node {
     }
 
     protected String getServerHostname() throws UnknownHostException {
-        return InetAddress.getLocalHost().getHostAddress();
+        return InetAddress.getLocalHost().getCanonicalHostName();
     }
 
     protected int getActualServerPort() {

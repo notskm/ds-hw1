@@ -1,6 +1,5 @@
 package csx55.overlay.node;
 
-import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.HashMap;
@@ -99,7 +98,7 @@ public class MessagingNode extends Node {
 
     private void sendRegisterRequest(Socket socket) throws IOException {
         int port = getActualServerPort();
-        String ipAddress = InetAddress.getLocalHost().getHostAddress();
+        String ipAddress = getServerHostname();
 
         new TCPSender(socket).send(new Register(ipAddress, port));
     }

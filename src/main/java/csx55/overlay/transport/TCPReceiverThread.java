@@ -21,7 +21,7 @@ public class TCPReceiverThread extends Thread {
         receiverSocket = socket;
         eventQueue = new LinkedList<>();
         eventFactory = EventFactory.getInstance();
-        socketIp = socket.getLocalAddress().getHostAddress();
+        socketIp = socket.getInetAddress().getCanonicalHostName();
     }
 
     public void run() {
