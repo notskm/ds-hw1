@@ -20,7 +20,7 @@ for i in "${!hosts[@]}"; do
     if [ "${hosts[$i]}" = "sacramento" ]; then
         tmux send-keys -t tmux-session-name "java csx55.overlay.node.Registry" C-m
     else
-        tmux send-keys -t tmux-session-name "sleep 5" C-m "java csx55.overlay.node.MessagingNode sacramento.cs.colostate.edu" C-m
+        tmux send-keys -t tmux-session-name "sleep 2" C-m "java csx55.overlay.node.MessagingNode sacramento.cs.colostate.edu" C-m
     fi
 done
 
