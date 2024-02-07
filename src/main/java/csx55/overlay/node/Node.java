@@ -173,6 +173,12 @@ public class Node {
             case TRAFFIC_SUMMARY:
                 onTaskSummaryResponse((TaskSummaryResponse) event);
                 break;
+            case MESSAGE:
+                onMessage((Message) event);
+                break;
+            default:
+                System.out.println("Bad event");
+                break;
         }
     }
 
@@ -211,6 +217,10 @@ public class Node {
     }
 
     protected void onTaskSummaryResponse(TaskSummaryResponse event) {
+
+    }
+
+    protected void onMessage(Message event) {
 
     }
 }

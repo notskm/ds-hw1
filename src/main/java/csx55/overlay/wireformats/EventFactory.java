@@ -45,6 +45,8 @@ public class EventFactory {
                     return new TaskSummaryRequest(data);
                 case TRAFFIC_SUMMARY:
                     return new TaskSummaryResponse(data);
+                case MESSAGE:
+                    return new Message(data);
                 default:
                     return null;
             }
