@@ -3,6 +3,9 @@ package csx55.overlay.node;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.Map;
 import java.io.IOException;
 
@@ -53,33 +56,35 @@ public class MessagingNode extends Node {
     }
 
     @Override
-    protected void onRegisterResponse(RegisterResponse response) {
-        System.out.println(response.getInfo());
-    }
-
-    @Override
     protected void onMessagingNodesList(MessagingNodesList nodes) {
         try {
             int numConnections = 0;
             for (MessagingNodeInfo node : nodes.getNodeInfo()) {
                 Socket socket = new Socket(node.getHostname(), node.getPort());
-                Register register = new Register(getServerHostname(), getActualServerPort());
-                new TCPSender(socket).send(register);
 
-                receiverThreads.add(new TCPReceiverThread(socket));
+                TCPReceiverThread thread = new TCPReceiverThread(socket);
+                thread.start();
+
+                receiverThreads.add(thread);
                 messagingNodes.put(node, socket);
+                sendRegisterRequest(socket);
+
                 numConnections++;
             }
             System.out.printf("All connections are established. Number of connections: %d%n", numConnections);
         } catch (IOException e) {
-
+            System.out.println(e.getMessage());
         }
     }
 
     @Override
     protected void onRegisterRequest(Register register) {
         MessagingNodeInfo node = new MessagingNodeInfo(register.getIpAddress(), register.getPortNumber());
-        messagingNodes.put(node, register.getOriginSocket());
+        registerNode(node, register.getOriginSocket());
+    }
+
+    private void registerNode(MessagingNodeInfo key, Socket socket) {
+        messagingNodes.put(key, socket);
     }
 
     @Override
@@ -158,5 +163,27 @@ public class MessagingNode extends Node {
     protected final void onDeregisterResponse(DeregisterResponse response) {
         System.out.println(response.getInfo());
         System.exit(0);
+    }
+
+    @Override
+    protected void onTaskInitiate(TaskInitiate event) {
+        List<MessagingNodeInfo> nodes = new ArrayList<>(messagingNodes.keySet());
+        ThreadLocalRandom random = ThreadLocalRandom.current();
+        for (int round = 0; round < event.getRounds(); round++) {
+            int randomIndex = random.nextInt(nodes.size());
+            MessagingNodeInfo destination = nodes.get(randomIndex);
+
+            Socket destinationSocket = messagingNodes.get(destination);
+            try {
+                new TCPSender(destinationSocket).send(new Message());
+            } catch (IOException e) {
+                System.out.println("Failed to send message: " + e.getMessage());
+            }
+        }
+    }
+
+    @Override
+    protected void onMessage(Message event) {
+        System.out.println(event.getNumber());
     }
 }
