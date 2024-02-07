@@ -41,6 +41,8 @@ public class EventFactory {
                     return new LinkWeights(data);
                 case TASK_INITIATE:
                     return new TaskInitiate(data);
+                case TASK_COMPLETE:
+                    return new TaskComplete(data);
                 case FULL_TRAFFIC_SUMMARY:
                     return new TaskSummaryRequest(data);
                 case TRAFFIC_SUMMARY:

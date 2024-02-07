@@ -10,14 +10,14 @@ public class TaskComplete extends Event {
         nodeIp = ip;
         nodePort = port;
     }
-    
+
     public TaskComplete(byte[] bytes) throws IOException {
         super(bytes);
     }
 
-	public String getIp() {
+    public String getIp() {
         return nodeIp;
-	}
+    }
 
     public Integer getPort() {
         return nodePort;

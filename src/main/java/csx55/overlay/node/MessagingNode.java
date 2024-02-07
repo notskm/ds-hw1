@@ -1,7 +1,6 @@
 package csx55.overlay.node;
 
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.List;
@@ -51,7 +50,7 @@ public class MessagingNode extends Node {
         }
     }
 
-    private MessagingNode() {
+    private MessagingNode() throws IOException {
         messagingNodes = new HashMap<>();
     }
 
@@ -126,15 +125,11 @@ public class MessagingNode extends Node {
     }
 
     private void constructMessagingNodeGraph(LinkInfo[] links) {
-        try {
-            ShortestPath pathComputer = new ShortestPath(links);
-            overlayGraph = new Graph(links);
-            MessagingNodeInfo thisNode = new MessagingNodeInfo(getServerHostname(), getActualServerPort());
-            Map<MessagingNodeInfo, MessagingNodeInfo> paths = pathComputer.computeShortestPaths(thisNode);
-            shortestPaths = paths;
-        } catch (UnknownHostException e) {
-            System.out.println("Error");
-        }
+        ShortestPath pathComputer = new ShortestPath(links);
+        overlayGraph = new Graph(links);
+        MessagingNodeInfo thisNode = new MessagingNodeInfo(getServerHostname(), getActualServerPort());
+        Map<MessagingNodeInfo, MessagingNodeInfo> paths = pathComputer.computeShortestPaths(thisNode);
+        shortestPaths = paths;
     }
 
     @Override
@@ -167,23 +162,72 @@ public class MessagingNode extends Node {
 
     @Override
     protected void onTaskInitiate(TaskInitiate event) {
+        executeNRounds(event.getRounds());
+        tellRegistryAllRoundsAreComplete();
+    }
+
+    private void executeNRounds(int n) {
+        for (int round = 0; round < n; round++) {
+            executeRound();
+        }
+    }
+
+    private void tellRegistryAllRoundsAreComplete() {
+        TaskComplete response = new TaskComplete(getServerHostname(), getActualServerPort());
+        sendEvent(response, registrySocket);
+    }
+
+    private void executeRound() {
+        MessagingNodeInfo destination = getRandomNode();
+        Socket destinationSocket = messagingNodes.get(destination);
+        MessagingNodeInfo[] path = getPath(destination);
+        sendMessage(new Message(path), destinationSocket);
+    }
+
+    private MessagingNodeInfo getRandomNode() {
         List<MessagingNodeInfo> nodes = new ArrayList<>(messagingNodes.keySet());
         ThreadLocalRandom random = ThreadLocalRandom.current();
-        for (int round = 0; round < event.getRounds(); round++) {
-            int randomIndex = random.nextInt(nodes.size());
-            MessagingNodeInfo destination = nodes.get(randomIndex);
+        int randomIndex = random.nextInt(nodes.size());
+        MessagingNodeInfo destination = nodes.get(randomIndex);
+        return destination;
+    }
 
-            Socket destinationSocket = messagingNodes.get(destination);
-            try {
-                new TCPSender(destinationSocket).send(new Message());
-            } catch (IOException e) {
-                System.out.println("Failed to send message: " + e.getMessage());
-            }
+    private MessagingNodeInfo[] getPath(MessagingNodeInfo destination) {
+        ArrayList<MessagingNodeInfo> output = new ArrayList<>();
+        output.add(destination);
+
+        MessagingNodeInfo predecessor = shortestPaths.get(destination);
+
+        while (predecessor != null) {
+            output.add(0, predecessor);
+            predecessor = shortestPaths.get(predecessor);
         }
+
+        MessagingNodeInfo[] path = new MessagingNodeInfo[output.size()];
+        return output.toArray(path);
+    }
+
+    protected void sendMessage(Message message, Socket socket) {
+        sendEvent(message, socket);
     }
 
     @Override
     protected void onMessage(Message event) {
-        System.out.println(event.getNumber());
+        MessagingNodeInfo nextNode = event.nextNode();
+
+        if (nextNode == null) {
+            System.out.println(event.getNumber());
+        } else {
+            sendEvent(event, messagingNodes.get(nextNode));
+        }
     }
+
+    private void sendEvent(Event event, Socket socket) {
+        try {
+            new TCPSender(socket).send(event);
+        } catch (IOException e) {
+            System.out.println("Failed to send event: " + e.getMessage());
+        }
+    }
+
 }

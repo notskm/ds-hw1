@@ -23,7 +23,7 @@ public class Registry extends Node {
         }
     }
 
-    Registry(String[] args) {
+    Registry(String[] args) throws IOException {
         super();
         parseArgs(args);
         messagingNodes = new HashMap<>();
@@ -191,6 +191,18 @@ public class Registry extends Node {
             new TCPSender(originSocket).send(response);
         } catch (IOException e) {
             deregisterNode(node);
+        }
+    }
+
+    private int completedCount = 0;
+
+    @Override
+    protected final void onTaskComplete(TaskComplete event) {
+        System.out.println(event.getIp());
+        completedCount++;
+
+        if (completedCount >= messagingNodes.size()) {
+            System.out.println("All nodes completed");
         }
     }
 }

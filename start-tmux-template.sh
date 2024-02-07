@@ -24,5 +24,8 @@ for i in "${!hosts[@]}"; do
     fi
 done
 
+sleep 5
+tmux send-keys -t tmux-session-name "setup-overlay 4" C-m "send-overlay-link-weights" C-m "start 1"
+
 #attach to the session
 tmux attach -t tmux-session-name

@@ -20,9 +20,12 @@ public class Node {
     protected ArrayList<TCPReceiverThread> receiverThreads;
     private InputReceiverThread inputThread;
 
-    Node() {
+    private String hostname;
+
+    Node() throws IOException {
         receiverThreads = new ArrayList<>();
         inputThread = new InputReceiverThread();
+        hostname = InetAddress.getLocalHost().getCanonicalHostName();
     }
 
     public void run(int serverPort) throws IOException {
@@ -46,8 +49,8 @@ public class Node {
     protected void initialize() {
     }
 
-    protected String getServerHostname() throws UnknownHostException {
-        return InetAddress.getLocalHost().getCanonicalHostName();
+    protected String getServerHostname() {
+        return hostname;
     }
 
     protected int getActualServerPort() {
