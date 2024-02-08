@@ -1,6 +1,6 @@
 ##!/bin/sh
 
-hosts=("concord" "honolulu" "indianapolis" "olympia" "phoenix" "santa-fe" "springfield" "salem" "saint-paul" "sacramento")
+hosts=("grouper" "beaver-creek" "riyadh" "bugatti" "cockroach" "montpelier" "preying-mantis" "steamboat" "baton-rouge" "howelsen-hill" "sacramento")
 
 directory="~/code/ds-hw1/build/classes/java/main"
 #start and detach from session
@@ -25,7 +25,7 @@ for i in "${!hosts[@]}"; do
 done
 
 sleep 5
-tmux send-keys -t tmux-session-name "setup-overlay 4" C-m "send-overlay-link-weights" C-m "start 1"
+tmux send-keys -t tmux-session-name "setup-overlay 5" C-m "send-overlay-link-weights" C-m "start 5000"
 
 #attach to the session
 tmux attach -t tmux-session-name
