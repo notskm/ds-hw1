@@ -27,8 +27,8 @@ public class TCPReceiverThreadTest {
         receiverSocket = mock(Socket.class);
         receiverAddress = mock(InetAddress.class);
 
-        when(receiverSocket.getLocalAddress()).thenReturn(receiverAddress);
-        when(receiverAddress.getHostAddress()).thenReturn("0.0.0.0");
+        when(receiverSocket.getInetAddress()).thenReturn(receiverAddress);
+        when(receiverAddress.getCanonicalHostName()).thenReturn("0.0.0.0");
     }
 
     @Test
