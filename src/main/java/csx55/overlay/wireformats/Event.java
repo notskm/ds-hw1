@@ -34,6 +34,8 @@ abstract public class Event {
                     field.set(this, new String(stringData));
                 } else if (field.getType() == int.class) {
                     field.set(this, din.readInt());
+                } else if (field.getType() == long.class) {
+                    field.set(this, din.readLong());
                 } else if (field.getType() == byte.class) {
                     field.set(this, din.readByte());
                 }
@@ -60,6 +62,9 @@ abstract public class Event {
                 } else if (field.getType() == int.class) {
                     int intField = (int) field.get(this);
                     daout.writeInt(intField);
+                } else if (field.getType() == long.class) {
+                    long longField = (long) field.get(this);
+                    daout.writeLong(longField);
                 } else if (field.getType() == byte.class) {
                     byte byteField = (byte) field.get(this);
                     daout.writeByte(byteField);
