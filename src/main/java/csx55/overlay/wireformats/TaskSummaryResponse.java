@@ -3,15 +3,16 @@ package csx55.overlay.wireformats;
 import java.io.IOException;
 
 public class TaskSummaryResponse extends Event {
-    String nodeIP;
-    int nodePort;
-    int numMessagesSent;
-    int sumMessagesSent;
-    int numMessagesReceived;
-    int sumMessagesReceived;
-    int numMessagesRelayed;
+    private String nodeIP;
+    private int nodePort;
+    private int numMessagesSent;
+    private long sumMessagesSent;
+    private int numMessagesReceived;
+    private long sumMessagesReceived;
+    private int numMessagesRelayed;
 
-    public TaskSummaryResponse(String ip, int port, int numSent, int sumSent, int numReceived, int sumReceived, int numRelayed) {
+    public TaskSummaryResponse(String ip, int port, int numSent, long sumSent, int numReceived, long sumReceived,
+            int numRelayed) {
         nodeIP = ip;
         nodePort = port;
         numMessagesSent = numSent;
@@ -20,7 +21,7 @@ public class TaskSummaryResponse extends Event {
         sumMessagesReceived = sumReceived;
         numMessagesRelayed = numRelayed;
     }
-    
+
     public TaskSummaryResponse(byte[] bytes) throws IOException {
         super(bytes);
     }
@@ -42,19 +43,19 @@ public class TaskSummaryResponse extends Event {
         return numMessagesSent;
     }
 
-	public int getSummationOfMessagesSent() {
+    public long getSummationOfMessagesSent() {
         return sumMessagesSent;
-	}
+    }
 
-	public int getNumberOfMessagesReceived() {
+    public int getNumberOfMessagesReceived() {
         return numMessagesReceived;
-	}
+    }
 
-	public int getSummationOfMessagesReceived() {
+    public long getSummationOfMessagesReceived() {
         return sumMessagesReceived;
-	}
+    }
 
-	public int getNumberOfMessagesRelayed() {
+    public int getNumberOfMessagesRelayed() {
         return numMessagesRelayed;
-	}
+    }
 }
