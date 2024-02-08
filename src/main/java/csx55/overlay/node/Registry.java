@@ -6,6 +6,7 @@ import java.io.IOException;
 
 import csx55.overlay.transport.TCPSender;
 import csx55.overlay.util.OverlayCreator;
+import csx55.overlay.util.StatisticsCollectorAndDisplay;
 import csx55.overlay.wireformats.*;
 import csx55.overlay.wireformats.RegisterResponse.Status;
 
@@ -198,11 +199,46 @@ public class Registry extends Node {
 
     @Override
     protected final void onTaskComplete(TaskComplete event) {
-        System.out.println(event.getIp());
         completedCount++;
 
         if (completedCount >= messagingNodes.size()) {
-            System.out.println("All nodes completed");
+            sleepForNSeconds(15);
+            sendToAllMessagingNodes(new TaskSummaryRequest());
+        }
+    }
+
+    private void sleepForNSeconds(int N) {
+        try {
+            Thread.sleep(15 * 1000);
+        } catch (InterruptedException e) {
+
+        }
+    }
+
+    StatisticsCollectorAndDisplay statCollector = new StatisticsCollectorAndDisplay();
+    int summariesRecieved = 0;
+
+    @Override
+    protected final void onTaskSummaryResponse(TaskSummaryResponse response) {
+        statCollector.addStats(response);
+        summariesRecieved++;
+
+        if (summariesRecieved >= messagingNodes.size()) {
+            statCollector.display();
+        }
+    }
+
+    private void sendToAllMessagingNodes(Event event) {
+        for (Socket socket : messagingNodes.values()) {
+            sendEvent(event, socket);
+        }
+    };
+
+    private void sendEvent(Event event, Socket socket) {
+        try {
+            new TCPSender(socket).send(event);
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
         }
     }
 }

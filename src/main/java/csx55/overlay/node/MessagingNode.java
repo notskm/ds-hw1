@@ -181,7 +181,15 @@ public class MessagingNode extends Node {
         MessagingNodeInfo destination = getRandomNode();
         Socket destinationSocket = messagingNodes.get(destination);
         MessagingNodeInfo[] path = getPath(destination);
-        sendMessage(new Message(path), destinationSocket);
+
+        for (int i = 0; i < 5; i++) {
+            Message message = new Message(path);
+
+            sent++;
+            sumSent += message.getNumber();
+
+            sendMessage(new Message(path), destinationSocket);
+        }
     }
 
     private MessagingNodeInfo getRandomNode() {
@@ -211,15 +219,32 @@ public class MessagingNode extends Node {
         sendEvent(message, socket);
     }
 
+    private int sent = 0;
+    private int received = 0;
+    private int relayed = 0;
+    private long sumSent = 0;
+    private long sumReceived = 0;
+
     @Override
     protected void onMessage(Message event) {
         MessagingNodeInfo nextNode = event.nextNode();
 
         if (nextNode == null) {
-            System.out.println(event.getNumber());
+            received++;
+            sumReceived += event.getNumber();
         } else {
+            relayed++;
             sendEvent(event, messagingNodes.get(nextNode));
         }
+    }
+
+    @Override
+    protected void onTaskSummaryRequest(TaskSummaryRequest event) {
+        String ip = getServerHostname();
+        int port = getActualServerPort();
+        TaskSummaryResponse response = new TaskSummaryResponse(ip, port, sent, sumSent, received, sumReceived, relayed);
+
+        sendEvent(response, event.getOriginSocket());
     }
 
     private void sendEvent(Event event, Socket socket) {
