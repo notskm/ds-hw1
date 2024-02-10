@@ -24,7 +24,7 @@ public class Registry extends Node {
         }
     }
 
-    Registry(String[] args) throws IOException {
+    public Registry(String[] args) throws IOException {
         super();
         parseArgs(args);
         messagingNodes = new HashMap<>();

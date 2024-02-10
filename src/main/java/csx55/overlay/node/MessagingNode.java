@@ -49,7 +49,7 @@ public class MessagingNode extends Node {
         }
     }
 
-    private MessagingNode() throws IOException {
+    public MessagingNode() throws IOException {
         messagingNodes = new HashMap<>();
     }
 

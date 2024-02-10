@@ -21,7 +21,7 @@ public class Node {
 
     private String hostname;
 
-    Node() throws IOException {
+    public Node() throws IOException {
         inputThread = new InputReceiverThread();
         hostname = InetAddress.getLocalHost().getCanonicalHostName();
         eventQueue = new LinkedBlockingQueue<>();
