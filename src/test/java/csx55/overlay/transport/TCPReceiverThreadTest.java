@@ -33,13 +33,13 @@ public class TCPReceiverThreadTest {
 
     @Test
     void testTCPReceiverThreadIsAThread() {
-        TCPReceiverThread thread = new TCPReceiverThread(receiverSocket);
+        TCPReceiverThread thread = makeThread();
         assert (thread instanceof Thread);
     }
 
     @Test
     void testPollWhenNoEventSent() {
-        TCPReceiverThread thread = new TCPReceiverThread(receiverSocket);
+        TCPReceiverThread thread = makeThread();
         thread.start();
 
         try {
@@ -55,15 +55,15 @@ public class TCPReceiverThreadTest {
     @Test
     void testPollWhenEventSent() {
         Register registerEvent = new Register("localhost", 5000);
-
         addEventToSocketInputStream(registerEvent);
 
-        TCPReceiverThread thread = new TCPReceiverThread(receiverSocket);
+        TCPReceiverThread thread = makeThread();
         thread.start();
 
-        closeSocketAndJoinThread(receiverSocket, thread);
-
-        Event event = thread.poll();
+        Event event = null;
+        while (event == null) {
+            event = thread.poll();
+        }
 
         try {
             assertArrayEquals(registerEvent.getBytes(), event.getBytes());
@@ -74,7 +74,7 @@ public class TCPReceiverThreadTest {
 
     @Test
     void testGetSocket() {
-        TCPReceiverThread thread = new TCPReceiverThread(receiverSocket);
+        TCPReceiverThread thread = makeThread();
         Socket socket = thread.getSocket();
         assertEquals(socket, receiverSocket);
     }
@@ -98,9 +98,9 @@ public class TCPReceiverThreadTest {
         }
     }
 
-    void closeSocketAndJoinThread(Socket socket, Thread thread) {
+    void closeSocketAndJoinThread(Thread thread) {
         try {
-            socket.close();
+            receiverSocket.close();
             thread.join();
         } catch (IOException e) {
             fail(e.getMessage());
@@ -109,4 +109,13 @@ public class TCPReceiverThreadTest {
         }
     }
 
+    TCPReceiverThread makeThread() {
+        try {
+            TCPReceiverThread thread = new TCPReceiverThread(receiverSocket);
+            return thread;
+        } catch (IOException e) {
+            fail(e.getMessage());
+            return null;
+        }
+    }
 }

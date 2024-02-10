@@ -121,9 +121,13 @@ public class Node {
     private void pollForSockets() {
         Socket socket = serverThread.poll();
         if (socket != null) {
-            TCPReceiverThread thread = new TCPReceiverThread(socket);
-            receiverThreads.add(thread);
-            thread.start();
+            try {
+                TCPReceiverThread thread = new TCPReceiverThread(socket);
+                receiverThreads.add(thread);
+                thread.start();
+            } catch (IOException e) {
+
+            }
         }
     }
 

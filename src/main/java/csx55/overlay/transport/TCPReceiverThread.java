@@ -1,7 +1,6 @@
 package csx55.overlay.transport;
 
 import java.io.DataInputStream;
-import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
@@ -16,36 +15,36 @@ public class TCPReceiverThread extends Thread {
     Queue<Event> eventQueue;
     EventFactory eventFactory;
     final String socketIp;
+    DataInputStream dis;
 
-    public TCPReceiverThread(Socket socket) {
+    public TCPReceiverThread(Socket socket) throws IOException {
         receiverSocket = socket;
         eventQueue = new LinkedList<>();
         eventFactory = EventFactory.getInstance();
         socketIp = socket.getInetAddress().getCanonicalHostName();
-    }
-
-    public void run() {
-        try (DataInputStream dis = getDataStream()) {
-            while (!receiverSocket.isClosed()) {
-                waitThenQueueEvent(dis);
-            }
-        } catch (EOFException e) {
-            System.err.println("TCPReceiverThread reached the end of the input stream");
-        } catch (IOException e) {
-            System.err.println(e.getMessage());
-        }
-    }
-
-    private void waitThenQueueEvent(DataInputStream dis) throws IOException {
-        Event event = readEvent(dis);
-        event.setOriginIp(socketIp);
-        event.setOriginSocket(receiverSocket);
-        enqueueEvent(event);
+        dis = getDataStream();
     }
 
     private DataInputStream getDataStream() throws IOException {
         InputStream is = receiverSocket.getInputStream();
         return new DataInputStream(is);
+    }
+
+    public void run() {
+        while (!receiverSocket.isClosed()) {
+            waitThenQueueEvent(dis);
+        }
+    }
+
+    private void waitThenQueueEvent(DataInputStream dis) {
+        try {
+            Event event = readEvent(dis);
+            event.setOriginIp(socketIp);
+            event.setOriginSocket(receiverSocket);
+            enqueueEvent(event);
+        } catch (IOException e) {
+            closeSocket();
+        }
     }
 
     private Event readEvent(DataInputStream dis) throws IOException {
@@ -58,6 +57,13 @@ public class TCPReceiverThread extends Thread {
 
     private synchronized void enqueueEvent(Event event) {
         eventQueue.add(event);
+    }
+
+    private void closeSocket() {
+        try {
+            dis.close();
+        } catch (IOException e) {
+        }
     }
 
     public synchronized Event poll() {

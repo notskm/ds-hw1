@@ -20,8 +20,6 @@ public class TCPServerThread extends Thread {
         while (!serverSocket.isClosed()) {
             waitThenQueueSocket();
         }
-
-        closeServerSocket();
     }
 
     private void waitThenQueueSocket() {
@@ -29,7 +27,7 @@ public class TCPServerThread extends Thread {
             Socket socket = serverSocket.accept();
             queueSocket(socket);
         } catch (IOException e) {
-            System.err.println(e.getMessage());
+            closeServerSocket();
         }
     }
 
@@ -37,7 +35,6 @@ public class TCPServerThread extends Thread {
         try {
             serverSocket.close();
         } catch (IOException e) {
-            System.err.println(e.getMessage());
         }
     }
 
