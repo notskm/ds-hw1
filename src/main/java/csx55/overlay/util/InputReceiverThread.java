@@ -7,7 +7,7 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 public class InputReceiverThread extends Thread {
-    Queue<String> inputQueue;
+    private Queue<String> inputQueue;
 
     public InputReceiverThread() {
         inputQueue = new LinkedList<>();
