@@ -11,6 +11,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,9 +23,11 @@ import csx55.overlay.wireformats.Register;
 public class TCPReceiverThreadTest {
     Socket receiverSocket;
     InetAddress receiverAddress;
+    BlockingQueue<Event> eventQueue;
 
     @BeforeEach
     void setup() {
+        eventQueue = new LinkedBlockingQueue<>();
         receiverSocket = mock(Socket.class);
         receiverAddress = mock(InetAddress.class);
 
@@ -38,22 +42,7 @@ public class TCPReceiverThreadTest {
     }
 
     @Test
-    void testPollWhenNoEventSent() {
-        TCPReceiverThread thread = makeThread();
-        thread.start();
-
-        try {
-            receiverSocket.close();
-        } catch (IOException e) {
-            fail(e.getMessage());
-        }
-
-        Event event = thread.poll();
-        assertNull(event);
-    }
-
-    @Test
-    void testPollWhenEventSent() {
+    void testThreadQueuesEvents() {
         Register registerEvent = new Register("localhost", 5000);
         addEventToSocketInputStream(registerEvent);
 
@@ -62,7 +51,7 @@ public class TCPReceiverThreadTest {
 
         Event event = null;
         while (event == null) {
-            event = thread.poll();
+            event = eventQueue.poll();
         }
 
         try {
@@ -70,13 +59,6 @@ public class TCPReceiverThreadTest {
         } catch (IOException e) {
             fail(e.getMessage());
         }
-    }
-
-    @Test
-    void testGetSocket() {
-        TCPReceiverThread thread = makeThread();
-        Socket socket = thread.getSocket();
-        assertEquals(socket, receiverSocket);
     }
 
     byte[] addLengthToByteArray(byte[] bytes) throws IOException {
@@ -111,7 +93,7 @@ public class TCPReceiverThreadTest {
 
     TCPReceiverThread makeThread() {
         try {
-            TCPReceiverThread thread = new TCPReceiverThread(receiverSocket);
+            TCPReceiverThread thread = new TCPReceiverThread(receiverSocket, eventQueue);
             return thread;
         } catch (IOException e) {
             fail(e.getMessage());

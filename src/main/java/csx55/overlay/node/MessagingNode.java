@@ -10,7 +10,6 @@ import java.io.IOException;
 
 import csx55.overlay.dijkstra.Graph;
 import csx55.overlay.dijkstra.ShortestPath;
-import csx55.overlay.transport.TCPReceiverThread;
 import csx55.overlay.transport.TCPSender;
 import csx55.overlay.wireformats.*;
 
@@ -61,10 +60,8 @@ public class MessagingNode extends Node {
             for (MessagingNodeInfo node : nodes.getNodeInfo()) {
                 Socket socket = new Socket(node.getHostname(), node.getPort());
 
-                TCPReceiverThread thread = new TCPReceiverThread(socket);
-                thread.start();
+                startReceiverThread(socket);
 
-                receiverThreads.add(thread);
                 messagingNodes.put(node, socket);
                 sendRegisterRequest(socket);
 
@@ -90,9 +87,7 @@ public class MessagingNode extends Node {
     protected final void initialize() {
         try {
             registrySocket = new Socket(registryHost, registryPort);
-            TCPReceiverThread registryReceiver = new TCPReceiverThread(registrySocket);
-            registryReceiver.start();
-            receiverThreads.add(registryReceiver);
+            startReceiverThread(registrySocket);
 
             sendRegisterRequest(registrySocket);
         } catch (IOException e) {

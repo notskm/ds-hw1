@@ -4,9 +4,8 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.Queue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import csx55.overlay.transport.TCPReceiverThread;
 import csx55.overlay.transport.TCPServerThread;
@@ -16,15 +15,16 @@ import csx55.overlay.wireformats.*;
 public class Node {
     private int actualServerPort;
     protected TCPServerThread serverThread;
-    protected ArrayList<TCPReceiverThread> receiverThreads;
     private InputReceiverThread inputThread;
+
+    private BlockingQueue<Event> eventQueue;
 
     private String hostname;
 
     Node() throws IOException {
-        receiverThreads = new ArrayList<>();
         inputThread = new InputReceiverThread();
         hostname = InetAddress.getLocalHost().getCanonicalHostName();
+        eventQueue = new LinkedBlockingQueue<>();
     }
 
     public void run(int serverPort) throws IOException {
@@ -122,24 +122,19 @@ public class Node {
         Socket socket = serverThread.poll();
         if (socket != null) {
             try {
-                TCPReceiverThread thread = new TCPReceiverThread(socket);
-                receiverThreads.add(thread);
-                thread.start();
+                startReceiverThread(socket);
             } catch (IOException e) {
 
             }
         }
     }
 
-    Queue<Event> eventQueue = new LinkedList<>();
+    protected void startReceiverThread(Socket socket) throws IOException {
+        TCPReceiverThread thread = new TCPReceiverThread(socket, eventQueue);
+        thread.start();
+    }
 
     private void pollForEvents() {
-        for (TCPReceiverThread thread : receiverThreads) {
-            Event event = thread.poll();
-            if (event != null) {
-                eventQueue.add(event);
-            }
-        }
         while (!eventQueue.isEmpty()) {
             onEvent(eventQueue.remove());
         }

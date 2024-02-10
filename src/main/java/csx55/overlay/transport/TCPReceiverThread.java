@@ -4,8 +4,8 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
-import java.util.LinkedList;
 import java.util.Queue;
+import java.util.concurrent.BlockingQueue;
 
 import csx55.overlay.wireformats.Event;
 import csx55.overlay.wireformats.EventFactory;
@@ -17,9 +17,9 @@ public class TCPReceiverThread extends Thread {
     final String socketIp;
     DataInputStream dis;
 
-    public TCPReceiverThread(Socket socket) throws IOException {
+    public TCPReceiverThread(Socket socket, BlockingQueue<Event> events) throws IOException {
         receiverSocket = socket;
-        eventQueue = new LinkedList<>();
+        eventQueue = events;
         eventFactory = EventFactory.getInstance();
         socketIp = socket.getInetAddress().getCanonicalHostName();
         dis = getDataStream();
@@ -64,13 +64,5 @@ public class TCPReceiverThread extends Thread {
             dis.close();
         } catch (IOException e) {
         }
-    }
-
-    public synchronized Event poll() {
-        return eventQueue.poll();
-    }
-
-    public Socket getSocket() {
-        return receiverSocket;
     }
 }
