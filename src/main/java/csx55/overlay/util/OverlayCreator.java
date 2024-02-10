@@ -22,6 +22,8 @@ public class OverlayCreator {
     ArrayList<LinkInfo> links;
 
     public OverlayCreator(Map<MessagingNodeInfo, Socket> nodes, int connectionLimit) {
+        validateArgumentsOrThrow(nodes, connectionLimit);
+
         socketTable = nodes;
         perNodeConnectionLimit = connectionLimit;
 
@@ -38,6 +40,16 @@ public class OverlayCreator {
         links = new ArrayList<>();
     }
 
+    private void validateArgumentsOrThrow(Map<MessagingNodeInfo, Socket> nodes, int connectionLimit) {
+        if (nodes.size() < connectionLimit) {
+            String message = "Cannot create overlay. The number of connections ";
+            message += "(" + connectionLimit + ") ";
+            message += "is greater than the number of nodes ";
+            message += "(" + nodes.size() + ")";
+            throw new IllegalArgumentException(message);
+        }
+    }
+
     public LinkInfo[] createOverlay() throws IOException {
         connectNodes();
         publishConnections();
@@ -45,29 +57,70 @@ public class OverlayCreator {
     }
 
     private void connectNodes() {
-        int jump = 1;
+        final int connectionCycles = calculateConnectionCycles();
+        final boolean connectOpposites = shouldConnectOpposites();
 
-        while (jump < messagingNodes.size()) {
-            for (int node = 0; node < messagingNodes.size(); node++) {
-                int nextNode = node + jump;
-                if (isAvailableForConnection(node) && isAvailableForConnection(nextNode)) {
-                    connect(node, nextNode);
-                } else {
-                    break;
-                }
-            }
-            jump++;
+        for (int i = 1; i <= connectionCycles; i++) {
+            connectNodesByJumpingAhead(i);
+        }
+
+        if (connectOpposites) {
+            connectOpposites();
         }
     }
 
-    private boolean isAvailableForConnection(int socketIndex) {
-        if (socketIndex >= connectionCounts.length) {
+    private int calculateConnectionCycles() {
+        // If we have 1 vertex, it should not connect to anything.
+        if (messagingNodes.size() <= 1) {
+            return 0;
+        }
+
+        // We should use connectOpposites() if we only have 2 nodes to ensure
+        // that they do not connect to each other twice.
+        if (messagingNodes.size() == 2) {
+            return 0;
+        }
+
+        return perNodeConnectionLimit / 2;
+    }
+
+    private boolean shouldConnectOpposites() {
+        // If we have 1 vertex, it should not connect to anything.
+        if (messagingNodes.size() <= 1) {
             return false;
         }
-        if (connectionCounts[socketIndex] >= perNodeConnectionLimit) {
+
+        // If we have 2 vertices and the connection limit isn't 0, then they
+        // should be allowed to make one connection with each other.
+        if (messagingNodes.size() == 2 && perNodeConnectionLimit > 0) {
+            return true;
+        }
+
+        // It is impossible to have an odd number of connections with an odd
+        // number of vertices, so we should not connect opposite vertices.
+        if (messagingNodes.size() % 2 == 1) {
             return false;
         }
-        return true;
+
+        return perNodeConnectionLimit % 2 != 0;
+    }
+
+    private void connectNodesByJumpingAhead(int jump) {
+        final int numberOfNodes = messagingNodes.size();
+
+        for (int i = 0; i < numberOfNodes; i++) {
+            final int toConnect = (i + jump) % numberOfNodes;
+            connect(i, toConnect);
+        }
+    }
+
+    private void connectOpposites() {
+        final int numberOfNodes = messagingNodes.size() / 2;
+
+        for (int i = 0; i < numberOfNodes; i++) {
+            final int toConnect = i + numberOfNodes;
+            connect(i, toConnect);
+        }
     }
 
     private void connect(int socketIndex1, int socketIndex2) {
