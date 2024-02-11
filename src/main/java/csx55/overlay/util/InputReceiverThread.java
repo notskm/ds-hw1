@@ -8,6 +8,7 @@ import java.util.Queue;
 
 public class InputReceiverThread extends Thread {
     private Queue<String> inputQueue;
+    private boolean running = true;
 
     public InputReceiverThread() {
         inputQueue = new LinkedList<>();
@@ -15,12 +16,29 @@ public class InputReceiverThread extends Thread {
 
     @Override
     public void run() {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         try {
-            while (true) {
-                addLine(reader.readLine());
-            }
+            readInputForever();
         } catch (IOException e) {
+
+        }
+    }
+
+    private void readInputForever() throws IOException {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+
+        while (isRunning()) {
+            if (reader.ready()) {
+                addLine(reader.readLine());
+            } else {
+                sleep();
+            }
+        }
+    }
+
+    private void sleep() {
+        try {
+            Thread.sleep(100);
+        } catch (InterruptedException e) {
 
         }
     }
@@ -31,5 +49,14 @@ public class InputReceiverThread extends Thread {
 
     public synchronized String poll() {
         return inputQueue.poll();
+    }
+
+    public synchronized void shutdown() {
+        running = false;
+        interrupt();
+    }
+
+    public synchronized boolean isRunning() {
+        return running;
     }
 }
