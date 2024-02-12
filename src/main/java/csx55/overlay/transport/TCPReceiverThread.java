@@ -18,6 +18,7 @@ public class TCPReceiverThread extends Thread {
     DataInputStream dis;
 
     public TCPReceiverThread(Socket socket, BlockingQueue<Event> events) throws IOException {
+        super("TCP Recevier");
         receiverSocket = socket;
         eventQueue = events;
         eventFactory = EventFactory.getInstance();
@@ -61,6 +62,7 @@ public class TCPReceiverThread extends Thread {
 
     private void closeSocket() {
         try {
+            receiverSocket.close();
             dis.close();
         } catch (IOException e) {
         }

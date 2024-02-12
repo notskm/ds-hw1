@@ -11,6 +11,7 @@ public class TCPServerThread extends Thread {
     private Queue<Socket> nodeQueue;
 
     public TCPServerThread(ServerSocket socket) {
+        super("TCP Server");
         serverSocket = socket;
         nodeQueue = new LinkedList<>();
     }

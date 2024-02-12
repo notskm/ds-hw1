@@ -11,6 +11,7 @@ public class InputReceiverThread extends Thread {
     private boolean running = true;
 
     public InputReceiverThread() {
+        super("System.in Receiver");
         inputQueue = new LinkedList<>();
     }
 
