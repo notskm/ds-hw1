@@ -51,6 +51,9 @@ public class MessagingNode extends Node {
 
     @Override
     protected void onMessagingNodesList(MessagingNodesList nodes) {
+        disconnectFromAllMessagingNodes();
+        clearCachedRoutes();
+
         try {
             int numConnections = 0;
             for (MessagingNodeInfo node : nodes.getNodeInfo()) {
@@ -67,6 +70,22 @@ public class MessagingNode extends Node {
         } catch (IOException e) {
             System.out.println(e.getMessage());
         }
+    }
+
+    private void disconnectFromAllMessagingNodes() {
+        for (Socket socket : messagingNodes.values()) {
+            try {
+                socket.close();
+            } catch (IOException e) {
+
+            }
+        }
+        messagingNodes.clear();
+    }
+
+    private void clearCachedRoutes() {
+        overlayGraph = new Graph(new LinkInfo[0]);
+        shortestPaths.clear();
     }
 
     @Override
