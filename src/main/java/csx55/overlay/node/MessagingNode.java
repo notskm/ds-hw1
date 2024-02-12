@@ -17,7 +17,6 @@ public class MessagingNode extends Node {
     static private String registryHost = "127.0.0.1";
     static private int registryPort = 5000;
     Socket registrySocket;
-    Map<MessagingNodeInfo, Socket> messagingNodes;
     Map<MessagingNodeInfo, MessagingNodeInfo> shortestPaths = new HashMap<>();
     Graph overlayGraph = new Graph(new LinkInfo[0]);
 
@@ -25,7 +24,7 @@ public class MessagingNode extends Node {
         try {
             parseArgs(args);
             new MessagingNode().run(0);
-        } catch (IOException e) {
+        } catch (Exception e) {
             System.err.println(e.getMessage());
         }
     }
@@ -108,8 +107,8 @@ public class MessagingNode extends Node {
             Deregister deregister = new Deregister(getServerHostname(), getActualServerPort());
             new TCPSender(registrySocket).send(deregister);
         } catch (IOException e) {
-            System.err.println(e.getMessage());
-            System.exit(-1);
+            System.out.println(e.getMessage());
+            shutdown();
         }
     }
 
@@ -152,7 +151,7 @@ public class MessagingNode extends Node {
     @Override
     protected final void onDeregisterResponse(DeregisterResponse response) {
         System.out.println(response.getInfo());
-        System.exit(0);
+        shutdown();
     }
 
     @Override

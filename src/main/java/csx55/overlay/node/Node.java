@@ -4,6 +4,10 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -14,21 +18,25 @@ import csx55.overlay.wireformats.*;
 
 public class Node {
     private int actualServerPort;
-    protected TCPServerThread serverThread;
+    private ServerSocket serverSocket;
+    private TCPServerThread serverThread;
     private InputReceiverThread inputThread;
-
     private BlockingQueue<Event> eventQueue;
-
     private String hostname;
+    private List<Socket> knownSockets;
+
+    protected Map<MessagingNodeInfo, Socket> messagingNodes;
 
     public Node() throws IOException {
+        messagingNodes = new HashMap<>();
         inputThread = new InputReceiverThread();
         hostname = InetAddress.getLocalHost().getCanonicalHostName();
         eventQueue = new LinkedBlockingQueue<>();
+        knownSockets = new LinkedList<>();
     }
 
     public void run(int serverPort) throws IOException {
-        ServerSocket serverSocket = new ServerSocket(serverPort);
+        serverSocket = new ServerSocket(serverPort);
         serverThread = new TCPServerThread(serverSocket);
         serverThread.start();
 
@@ -38,10 +46,42 @@ public class Node {
 
         initialize();
 
-        while (true) {
+        while (!serverSocket.isClosed()) {
             pollForInput();
             pollForSockets();
             pollForEvents();
+            removeDeadSockets();
+        }
+    }
+
+    private void removeDeadSockets() {
+        knownSockets.removeIf((Socket socket) -> socket.isClosed());
+    }
+
+    public void shutdown() {
+        inputThread.shutdown();
+
+        try {
+            serverSocket.close();
+        } catch (IOException e) {
+            System.out.println("Failed to close server");
+        }
+
+        for (Socket socket : knownSockets) {
+            try {
+                socket.close();
+            } catch (IOException e) {
+                System.out.println("Failed to close socket");
+            }
+        }
+
+        for (Socket socket : messagingNodes.values()) {
+            try {
+                socket.close();
+            } catch (IOException e) {
+                System.out.println("Failed to close messaging node socket");
+            }
+
         }
     }
 
@@ -126,16 +166,22 @@ public class Node {
             } catch (IOException e) {
 
             }
+
         }
+    }
+
+    private void cacheSocket(Socket socket) {
+        knownSockets.add(socket);
     }
 
     protected void startReceiverThread(Socket socket) throws IOException {
         TCPReceiverThread thread = new TCPReceiverThread(socket, eventQueue);
         thread.start();
+        cacheSocket(socket);
     }
 
     private void pollForEvents() {
-        while (!eventQueue.isEmpty()) {
+        if (!eventQueue.isEmpty()) {
             onEvent(eventQueue.remove());
         }
     }

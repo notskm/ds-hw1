@@ -11,7 +11,6 @@ import csx55.overlay.wireformats.*;
 import csx55.overlay.wireformats.RegisterResponse.Status;
 
 public class Registry extends Node {
-    private HashMap<MessagingNodeInfo, Socket> messagingNodes;
     private LinkInfo[] links;
     private static int serverPort = 5000;
 
