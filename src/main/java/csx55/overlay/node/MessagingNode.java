@@ -21,12 +21,8 @@ public class MessagingNode extends Node {
     Graph overlayGraph = new Graph(new LinkInfo[0]);
 
     public static void main(String[] args) {
-        try {
-            parseArgs(args);
-            new MessagingNode().run(0);
-        } catch (Exception e) {
-            System.err.println(e.getMessage());
-        }
+        parseArgs(args);
+        new MessagingNode().run(0);
     }
 
     private static void parseArgs(String[] args) {
@@ -48,7 +44,8 @@ public class MessagingNode extends Node {
         }
     }
 
-    public MessagingNode() throws IOException {
+    public MessagingNode() {
+        super();
         messagingNodes = new HashMap<>();
     }
 

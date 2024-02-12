@@ -15,15 +15,11 @@ public class Registry extends Node {
     private static int serverPort = 5000;
 
     public static void main(String[] args) {
-        try {
-            parseArgs(args);
-            new Registry(args).run(serverPort);
-        } catch (Exception e) {
-            System.err.println(e.getMessage());
-        }
+        parseArgs(args);
+        new Registry(args).run(serverPort);
     }
 
-    public Registry(String[] args) throws IOException {
+    public Registry(String[] args) {
         super();
         parseArgs(args);
         messagingNodes = new HashMap<>();

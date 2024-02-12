@@ -27,30 +27,39 @@ public class Node {
 
     protected Map<MessagingNodeInfo, Socket> messagingNodes;
 
-    public Node() throws IOException {
-        messagingNodes = new HashMap<>();
-        inputThread = new InputReceiverThread();
-        hostname = InetAddress.getLocalHost().getCanonicalHostName();
-        eventQueue = new LinkedBlockingQueue<>();
-        knownSockets = new LinkedList<>();
+    public Node() {
+        try {
+            messagingNodes = new HashMap<>();
+            inputThread = new InputReceiverThread();
+            hostname = InetAddress.getLocalHost().getCanonicalHostName();
+            eventQueue = new LinkedBlockingQueue<>();
+            knownSockets = new LinkedList<>();
+        } catch (IOException e) {
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
-    public void run(int serverPort) throws IOException {
-        serverSocket = new ServerSocket(serverPort);
-        serverThread = new TCPServerThread(serverSocket);
-        serverThread.start();
+    public void run(int serverPort) {
+        try {
+            serverSocket = new ServerSocket(serverPort);
+            serverThread = new TCPServerThread(serverSocket);
+            serverThread.start();
 
-        inputThread.start();
+            inputThread.start();
 
-        actualServerPort = serverSocket.getLocalPort();
+            actualServerPort = serverSocket.getLocalPort();
 
-        initialize();
+            initialize();
 
-        while (!serverSocket.isClosed()) {
-            pollForInput();
-            pollForSockets();
-            pollForEvents();
-            removeDeadSockets();
+            while (!serverSocket.isClosed()) {
+                pollForInput();
+                pollForSockets();
+                pollForEvents();
+                removeDeadSockets();
+            }
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+            shutdown();
         }
     }
 
