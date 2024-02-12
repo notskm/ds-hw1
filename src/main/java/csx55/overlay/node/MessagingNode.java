@@ -20,6 +20,12 @@ public class MessagingNode extends Node {
     Map<MessagingNodeInfo, MessagingNodeInfo> shortestPaths = new HashMap<>();
     Graph overlayGraph = new Graph(new LinkInfo[0]);
 
+    private int sent = 0;
+    private int received = 0;
+    private int relayed = 0;
+    private long sumSent = 0;
+    private long sumReceived = 0;
+
     public static void main(String[] args) {
         parseArgs(args);
         new MessagingNode().run(0);
@@ -198,7 +204,7 @@ public class MessagingNode extends Node {
             sent++;
             sumSent += message.getNumber();
 
-            sendMessage(new Message(path), destinationSocket);
+            sendMessage(message, destinationSocket);
         }
     }
 
@@ -228,12 +234,6 @@ public class MessagingNode extends Node {
     protected void sendMessage(Message message, Socket socket) {
         sendEvent(message, socket);
     }
-
-    private int sent = 0;
-    private int received = 0;
-    private int relayed = 0;
-    private long sumSent = 0;
-    private long sumReceived = 0;
 
     @Override
     protected void onMessage(Message event) {
