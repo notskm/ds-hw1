@@ -14,14 +14,14 @@ public class TCPSender {
     public TCPSender(Socket socket) {
         sendSocket = socket;
     }
-    
+
     public void send(Event event) throws IOException {
         OutputStream out = sendSocket.getOutputStream();
         BufferedOutputStream bout = new BufferedOutputStream(out);
         DataOutputStream dout = new DataOutputStream(bout);
-        
+
         byte[] bytes = event.getBytes();
-        
+
         dout.writeInt(bytes.length);
         dout.write(bytes);
         dout.flush();
