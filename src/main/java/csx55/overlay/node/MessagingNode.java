@@ -236,6 +236,12 @@ public class MessagingNode extends Node {
         TaskSummaryResponse response = new TaskSummaryResponse(ip, port, sent, sumSent, received, sumReceived, relayed);
 
         sendEvent(response, event.getOriginSocket());
+
+        sent = 0;
+        received = 0;
+        relayed = 0;
+        sumSent = 0;
+        sumReceived = 0;
     }
 
     private void sendEvent(Event event, Socket socket) {
