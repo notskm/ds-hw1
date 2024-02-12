@@ -214,7 +214,10 @@ public class Registry extends Node {
         summariesRecieved++;
 
         if (summariesRecieved >= messagingNodes.size()) {
+            summariesRecieved = 0;
+            completedCount = 0;
             statCollector.display();
+            statCollector = new StatisticsCollectorAndDisplay();
         }
     }
 
