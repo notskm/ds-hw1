@@ -30,27 +30,41 @@ public class Registry extends Node {
 
     @Override
     final protected void onRegisterRequest(Register register) {
-        MessagingNodeInfo node = new MessagingNodeInfo(register.getIpAddress(), register.getPortNumber());
-
-        RegisterResponse response = null;
-
-        String socketIP = register.getOriginIp();
-        String requestIp = register.getIpAddress();
-        Socket originSocket = register.getOriginSocket();
-
-        if (!socketIP.equals(requestIp)) {
-            response = getRegistrationIpMismatchResponse(register, socketIP);
-        } else if (messagingNodes.containsKey(node)) {
-            response = getRegistrationNodeAlreadyExistsResponse(node);
-        } else {
-            registerNode(node, originSocket);
-            response = getRegistrationSuccessfulMessage(register);
+        // Cannot handle register requests while task is ongoing
+        if (!taskLock.tryAcquire()) {
+            return;
         }
 
         try {
-            new TCPSender(originSocket).send(response);
-        } catch (IOException e) {
-            deregisterNode(node);
+            // Cannot handle register requests after link weights are sent
+            if (linkWeightsSent) {
+                return;
+            }
+
+            MessagingNodeInfo node = new MessagingNodeInfo(register.getIpAddress(), register.getPortNumber());
+
+            RegisterResponse response = null;
+
+            String socketIP = register.getOriginIp();
+            String requestIp = register.getIpAddress();
+            Socket originSocket = register.getOriginSocket();
+
+            if (!socketIP.equals(requestIp)) {
+                response = getRegistrationIpMismatchResponse(register, socketIP);
+            } else if (messagingNodes.containsKey(node)) {
+                response = getRegistrationNodeAlreadyExistsResponse(node);
+            } else {
+                registerNode(node, originSocket);
+                response = getRegistrationSuccessfulMessage(register);
+            }
+
+            try {
+                new TCPSender(originSocket).send(response);
+            } catch (IOException e) {
+                deregisterNode(node);
+            }
+        } finally {
+            taskLock.release();
         }
     }
 
@@ -114,32 +128,69 @@ public class Registry extends Node {
         }
     }
 
+    private boolean linkWeightsSent = false;
+    private boolean overlayReady = false;
+
     @Override
     protected final void setupOverlay(int connectionLimit) {
+        // Can't change the overlay while task is in progress.
+        if (!taskLock.tryAcquire()) {
+            return;
+        }
+
         try {
             OverlayCreator creator = new OverlayCreator(messagingNodes, connectionLimit);
+            linkWeightsSent = false;
+            overlayReady = false;
+
             links = creator.createOverlay();
+
+            overlayReady = true;
         } catch (IOException e) {
         } catch (IllegalArgumentException e) {
+        } finally {
+            taskLock.release();
         }
     }
 
     @Override
     protected final void sendOverlayLinkWeights() {
-        LinkWeights weights = new LinkWeights(links);
-        for (Socket node : messagingNodes.values()) {
-            try {
-                new TCPSender(node).send(weights);
-            } catch (IOException e) {
+        // Can't send weights while task is in progress.
+        if (!taskLock.tryAcquire()) {
+            return;
+        }
 
+        // Must set up the overlay before sending weights.
+        try {
+            if (!overlayReady) {
+                return;
             }
+
+            LinkWeights weights = new LinkWeights(links);
+            for (Socket node : messagingNodes.values()) {
+                try {
+                    new TCPSender(node).send(weights);
+                } catch (IOException e) {
+
+                }
+            }
+
+            linkWeightsSent = true;
+        } finally {
+            taskLock.release();
         }
     }
 
     @Override
     protected final void start(int rounds) {
-        // Cannot start start tasks if they are currently in progress.
+        // Cannot start tasks if they are currently in progress.
         if (!taskLock.tryAcquire()) {
+            return;
+        }
+
+        // Cannot start tasks if link weights haven't been sent to the nodes.
+        if (!linkWeightsSent) {
+            taskLock.release();
             return;
         }
 
@@ -155,39 +206,48 @@ public class Registry extends Node {
 
     @Override
     protected final void onDeregisterRequest(Deregister event) {
-        MessagingNodeInfo node = new MessagingNodeInfo(event.getIpAddress(), event.getPort());
-
-        DeregisterResponse.Status status = null;
-        String message = null;
-
-        String socketIP = event.getOriginIp();
-        String requestIp = event.getIpAddress();
-        Socket originSocket = event.getOriginSocket();
-
-        if (!socketIP.equals(requestIp)) {
-            status = DeregisterResponse.Status.FAILURE;
-            message = "Deregistration request unsuccessful. The provided IP address ";
-            message += event.getIpAddress();
-            message += " does not match the node's ip address ";
-            message += socketIP;
-        } else if (!messagingNodes.containsKey(node)) {
-            status = DeregisterResponse.Status.FAILURE;
-            message = "not in registry";
-            message = "Deregistration request unsuccessful. The node '";
-            message += node;
-            message += " does not exist in the registry";
-        } else {
-            deregisterNode(node);
-            status = DeregisterResponse.Status.SUCCESS;
-            message = "Deregistration successful.";
+        // Can't handle deregister events while task is ongoing.
+        if (!taskLock.tryAcquire()) {
+            return;
         }
 
-        DeregisterResponse response = new DeregisterResponse(status, message);
-
         try {
-            new TCPSender(originSocket).send(response);
-        } catch (IOException e) {
-            deregisterNode(node);
+            MessagingNodeInfo node = new MessagingNodeInfo(event.getIpAddress(), event.getPort());
+
+            DeregisterResponse.Status status = null;
+            String message = null;
+
+            String socketIP = event.getOriginIp();
+            String requestIp = event.getIpAddress();
+            Socket originSocket = event.getOriginSocket();
+
+            if (!socketIP.equals(requestIp)) {
+                status = DeregisterResponse.Status.FAILURE;
+                message = "Deregistration request unsuccessful. The provided IP address ";
+                message += event.getIpAddress();
+                message += " does not match the node's ip address ";
+                message += socketIP;
+            } else if (!messagingNodes.containsKey(node)) {
+                status = DeregisterResponse.Status.FAILURE;
+                message = "not in registry";
+                message = "Deregistration request unsuccessful. The node '";
+                message += node;
+                message += " does not exist in the registry";
+            } else {
+                deregisterNode(node);
+                status = DeregisterResponse.Status.SUCCESS;
+                message = "Deregistration successful.";
+            }
+
+            DeregisterResponse response = new DeregisterResponse(status, message);
+
+            try {
+                new TCPSender(originSocket).send(response);
+            } catch (IOException e) {
+                deregisterNode(node);
+            }
+        } finally {
+            taskLock.release();
         }
     }
 
@@ -224,9 +284,9 @@ public class Registry extends Node {
             completedCount = 0;
             statCollector.display();
             statCollector = new StatisticsCollectorAndDisplay();
-        }
 
-        taskLock.release();
+            taskLock.release();
+        }
     }
 
     private void sendToAllMessagingNodes(Event event) {
