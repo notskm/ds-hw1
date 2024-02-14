@@ -2,6 +2,7 @@ package csx55.overlay.node;
 
 import java.net.Socket;
 import java.util.HashMap;
+import java.util.concurrent.Semaphore;
 import java.io.IOException;
 
 import csx55.overlay.transport.TCPSender;
@@ -13,6 +14,7 @@ import csx55.overlay.wireformats.RegisterResponse.Status;
 public class Registry extends Node {
     private LinkInfo[] links;
     private static int serverPort = 5000;
+    private Semaphore taskLock = new Semaphore(1);
 
     public static void main(String[] args) {
         parseArgs(args);
@@ -136,6 +138,11 @@ public class Registry extends Node {
 
     @Override
     protected final void start(int rounds) {
+        // Cannot start start tasks if they are currently in progress.
+        if (!taskLock.tryAcquire()) {
+            return;
+        }
+
         TaskInitiate initiate = new TaskInitiate(rounds);
         try {
             for (Socket socket : messagingNodes.values()) {
@@ -218,6 +225,8 @@ public class Registry extends Node {
             statCollector.display();
             statCollector = new StatisticsCollectorAndDisplay();
         }
+
+        taskLock.release();
     }
 
     private void sendToAllMessagingNodes(Event event) {
