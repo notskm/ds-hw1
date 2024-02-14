@@ -60,9 +60,9 @@ public class StatisticsCollectorAndDisplay {
         System.out.print(" | ");
         System.out.print(stat.numberOfMessagesReceived);
         System.out.print(" | ");
-        System.out.print(stat.summationOfSentMessages);
+        System.out.print(stat.summationOfSentMessages + ".00");
         System.out.print(" | ");
-        System.out.print(stat.summationOfReceivedMessages);
+        System.out.print(stat.summationOfReceivedMessages + ".00");
         System.out.print(" | ");
         System.out.print(stat.numberOfMessagesRelayed);
         System.out.println();
@@ -75,9 +75,9 @@ public class StatisticsCollectorAndDisplay {
         System.out.print(" | ");
         System.out.print(grandTotal.numberOfMessagesReceived);
         System.out.print(" | ");
-        System.out.print(grandTotal.summationOfSentMessages);
+        System.out.print(grandTotal.summationOfSentMessages + ".00");
         System.out.print(" | ");
-        System.out.print(grandTotal.summationOfReceivedMessages);
+        System.out.print(grandTotal.summationOfReceivedMessages + ".00");
         System.out.println();
     }
 
