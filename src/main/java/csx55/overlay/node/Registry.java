@@ -66,7 +66,7 @@ public class Registry extends Node {
         String message = "Registration request successful. ";
         message += "The number of messaging nodes currently constituting the overlay is ";
         message += "(" + getRegisteredCount() + ")";
-        return new RegisterResponse(Status.FAILURE, message);
+        return new RegisterResponse(Status.SUCCESS, message);
     }
 
     private RegisterResponse getRegistrationIpMismatchResponse(Register event, String originIp) {

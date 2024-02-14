@@ -12,6 +12,7 @@ import csx55.overlay.dijkstra.Graph;
 import csx55.overlay.dijkstra.ShortestPath;
 import csx55.overlay.transport.TCPSender;
 import csx55.overlay.wireformats.*;
+import csx55.overlay.wireformats.RegisterResponse.Status;
 
 public class MessagingNode extends Node {
     static private String registryHost = "127.0.0.1";
@@ -53,6 +54,14 @@ public class MessagingNode extends Node {
     public MessagingNode() {
         super();
         messagingNodes = new HashMap<>();
+    }
+
+    @Override
+    protected void onRegisterResponse(RegisterResponse e) {
+        System.out.println(e.getInfo());
+        if (e.getStatus() == Status.FAILURE) {
+            shutdown();
+        }
     }
 
     @Override
