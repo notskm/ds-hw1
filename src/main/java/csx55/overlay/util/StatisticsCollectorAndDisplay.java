@@ -11,7 +11,7 @@ public class StatisticsCollectorAndDisplay {
     public StatisticsCollectorAndDisplay() {
         statistics = new ArrayList<>();
         grandTotal = new Statistics();
-        grandTotal.nodeName = "total";
+        grandTotal.nodeName = "sum";
     }
 
     public void addStats(TaskSummaryResponse taskInfo) {
@@ -34,15 +34,15 @@ public class StatisticsCollectorAndDisplay {
 
     private void printHeader() {
         System.out.print("Node");
-        System.out.print(" | ");
+        System.out.print(",");
         System.out.print("Number of messages sent");
-        System.out.print(" | ");
+        System.out.print(",");
         System.out.print("Number of messages recieved");
-        System.out.print(" | ");
+        System.out.print(",");
         System.out.print("Summation of sent messages");
-        System.out.print(" | ");
+        System.out.print(",");
         System.out.print("Summation of received messages");
-        System.out.print(" | ");
+        System.out.print(",");
         System.out.print("Number of messages relayed");
         System.out.println();
     }
@@ -55,28 +55,28 @@ public class StatisticsCollectorAndDisplay {
 
     private void printStat(Statistics stat) {
         System.out.print(stat.nodeName);
-        System.out.print(" | ");
+        System.out.print(",");
         System.out.print(stat.numberOfMessagesSent);
-        System.out.print(" | ");
+        System.out.print(",");
         System.out.print(stat.numberOfMessagesReceived);
-        System.out.print(" | ");
+        System.out.print(",");
         System.out.print(stat.summationOfSentMessages + ".00");
-        System.out.print(" | ");
+        System.out.print(",");
         System.out.print(stat.summationOfReceivedMessages + ".00");
-        System.out.print(" | ");
+        System.out.print(",");
         System.out.print(stat.numberOfMessagesRelayed);
         System.out.println();
     }
 
     private void printGrandTotals() {
         System.out.print(grandTotal.nodeName);
-        System.out.print(" | ");
+        System.out.print(",");
         System.out.print(grandTotal.numberOfMessagesSent);
-        System.out.print(" | ");
+        System.out.print(",");
         System.out.print(grandTotal.numberOfMessagesReceived);
-        System.out.print(" | ");
+        System.out.print(",");
         System.out.print(grandTotal.summationOfSentMessages + ".00");
-        System.out.print(" | ");
+        System.out.print(",");
         System.out.print(grandTotal.summationOfReceivedMessages + ".00");
         System.out.println();
     }
