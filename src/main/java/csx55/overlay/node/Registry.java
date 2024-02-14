@@ -118,9 +118,7 @@ public class Registry extends Node {
             OverlayCreator creator = new OverlayCreator(messagingNodes, connectionLimit);
             links = creator.createOverlay();
         } catch (IOException e) {
-            System.out.println("A messaging node disconnected while creating the overlay. Please rerun the command.");
         } catch (IllegalArgumentException e) {
-            System.out.println(e.getMessage());
         }
     }
 
@@ -232,7 +230,6 @@ public class Registry extends Node {
         try {
             new TCPSender(socket).send(event);
         } catch (IOException e) {
-            System.out.println(e.getMessage());
         }
     }
 }

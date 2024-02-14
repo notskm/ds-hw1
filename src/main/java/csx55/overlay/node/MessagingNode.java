@@ -74,7 +74,6 @@ public class MessagingNode extends Node {
             }
             System.out.printf("All connections are established. Number of connections: %d%n", numConnections);
         } catch (IOException e) {
-            System.out.println(e.getMessage());
         }
     }
 
@@ -129,7 +128,6 @@ public class MessagingNode extends Node {
             Deregister deregister = new Deregister(getServerHostname(), getActualServerPort());
             new TCPSender(registrySocket).send(deregister);
         } catch (IOException e) {
-            System.out.println(e.getMessage());
             shutdown();
         }
     }
@@ -156,18 +154,32 @@ public class MessagingNode extends Node {
     }
 
     private void printPathToNode(MessagingNodeInfo destination) {
-        String output = destination.toString();
+        String output = shortHostName(destination.getHostname());
 
         MessagingNodeInfo predecessor = shortestPaths.get(destination);
 
         while (predecessor != null) {
             int weight = overlayGraph.edge(predecessor, destination).weight;
-            output = predecessor + "--" + weight + "--" + output;
+            String predecessorName = shortHostName(predecessor.getHostname());
+            output = predecessorName + "--" + weight + "--" + output;
             destination = predecessor;
             predecessor = shortestPaths.get(predecessor);
         }
 
         System.out.println(output);
+    }
+
+    private String shortHostName(String host) {
+        String[] parts = host.split("\\.");
+        if (parts.length == 0) {
+            return host;
+        }
+
+        if (parts[0].isEmpty()) {
+            return host;
+        }
+
+        return parts[0];
     }
 
     @Override
@@ -267,7 +279,6 @@ public class MessagingNode extends Node {
         try {
             new TCPSender(socket).send(event);
         } catch (IOException e) {
-            System.out.println("Failed to send event: " + e.getMessage());
         }
     }
 

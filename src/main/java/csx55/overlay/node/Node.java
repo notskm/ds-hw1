@@ -73,14 +73,12 @@ public class Node {
         try {
             serverSocket.close();
         } catch (IOException e) {
-            System.out.println("Failed to close server");
         }
 
         for (Socket socket : knownSockets) {
             try {
                 socket.close();
             } catch (IOException e) {
-                System.out.println("Failed to close socket");
             }
         }
 
@@ -88,7 +86,6 @@ public class Node {
             try {
                 socket.close();
             } catch (IOException e) {
-                System.out.println("Failed to close messaging node socket");
             }
 
         }
@@ -132,10 +129,8 @@ public class Node {
             } else if (commandName.equals("exit-overlay")) {
                 exitOverlay();
             } else {
-                System.out.println("Invalid command: " + input);
             }
         } catch (NumberFormatException | UnsupportedOperationException e) {
-            System.out.println("Invalid command: " + input);
         }
     }
 
@@ -233,7 +228,6 @@ public class Node {
                 onMessage((Message) event);
                 break;
             default:
-                System.out.println("Bad event");
                 break;
         }
     }
