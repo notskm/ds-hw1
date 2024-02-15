@@ -1,3 +1,8 @@
+To build, run gradle build. Then cd into build/classes/java/main.
+
+Run messaging nodes and registry on separate machines.
+
+Files:
 .
 ├── build.gradle    [Builds the applications]
 ├── README.txt      [This file]
