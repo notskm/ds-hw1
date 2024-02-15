@@ -265,7 +265,7 @@ public class Registry extends Node {
 
     private void sleepForNSeconds(int N) {
         try {
-            Thread.sleep(15 * 1000);
+            Thread.sleep(N * 1000);
         } catch (InterruptedException e) {
 
         }
