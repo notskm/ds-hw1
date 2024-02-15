@@ -258,7 +258,7 @@ public class Registry extends Node {
         completedCount++;
 
         if (completedCount >= messagingNodes.size()) {
-            sleepForNSeconds(15);
+            sleepForNSeconds(20);
             sendToAllMessagingNodes(new TaskSummaryRequest());
         }
     }
