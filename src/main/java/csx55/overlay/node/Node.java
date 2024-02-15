@@ -58,7 +58,6 @@ public class Node {
                 removeDeadSockets();
             }
         } catch (Exception e) {
-            System.err.println(e.getMessage());
             shutdown();
         }
     }
